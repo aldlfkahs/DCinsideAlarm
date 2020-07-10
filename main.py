@@ -68,7 +68,7 @@ class MyApp(QWidget):
       grid.addWidget(btn2, 1, 1)
 
       self.setWindowTitle('DC 새글 알리미')
-      self.setWindowIcon(QIcon('.img\\icon.png'))
+      self.setWindowIcon(QIcon('icon.png'))
       self.setFixedSize(380, 100)
       self.center()
       self.show()
@@ -121,7 +121,7 @@ class MyApp(QWidget):
                       title = new_title[n_idx].text
                       toaster.show_toast(title,
                                          name,
-                                         icon_path=".img\\dc_image.ico",
+                                         icon_path="dc_image.ico",
                                          duration=5)
                   n_idx = n_idx + 1
               if flag == False:
