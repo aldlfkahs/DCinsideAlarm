@@ -1,0 +1,21 @@
+Metadata-Version: 2.1
+Name: win10toast-for-pip-bigger-10
+Version: 1.0
+Summary: An easy-to-use Python library for displaying Windows 10 Toast Notifications
+Home-page: https://github.com/jithurjacob/Windows-10-Toast-Notifications
+Author: Jithu R Jacob
+Author-email: jithurjacob@gmail.com
+License: BSD
+Download-URL: https://github.com/jithurjacob/Windows-10-Toast-Notifications/tarball/0.9
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Topic :: Utilities
+Classifier: Operating System :: Microsoft
+Classifier: Environment :: Win32 (MS Windows)
+Classifier: License :: OSI Approved :: MIT License
+Requires-Dist: pypiwin32
+Requires-Dist: setuptools
+
+UNKNOWN
+
+
