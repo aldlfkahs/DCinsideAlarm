@@ -1,0 +1,16 @@
+1. 개발자 pip 설치
+(pip uninstall pyinstaller)
+pip install https://github.com/pyinstaller/pyinstaller/archive/develop.zip
+
+2. 아래 명령어 실행
+pyinstaller --hidden-import=pkg_resources.py2_warn --onefile --windowed --icon "C:/Users/SeungWon/PycharmProjects/DCinsideAlarm/icon.ico" --add-data "C:/Users/SeungWon/PycharmProjects/DCinsideAlarm/dc_image.ico;." --add-data "C:/Users/SeungWon/PycharmProjects/DCinsideAlarm/icon.png;." ""
+
+
+
+
+
+pyinstaller --hidden-import=pkg_resources.py2_warn --onefile --windowed --icon "icon.ico" --add-data "dc_image.ico;." --add-data "icon.png;." ""
+
+
+
+https://xn--lg3bt3ss6d.com/7 --> https://github.com/pyinstaller/pyinstaller/issues/2152
