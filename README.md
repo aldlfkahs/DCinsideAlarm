@@ -6,7 +6,7 @@
 디씨인사이드 특정 갤러리에 새로운 글이 올라오면 윈도우10 팝업 메시지로 알려주는 프로그램입니다.  
 새 글 알림을 받고 싶은 사이트의 메인 페이지 주소를 적은 뒤, 시작 버튼을 누르면 됩니다.  
 __반드시 사용 전 설정사항과 주의사항을 읽으신 뒤에 사용해주세요!__  
-다운로드는 [여기를 클릭](https://drive.google.com/file/d/1dZlNlyTAjjZoR2WvN6qQ4db-KsoBf2M4/view?usp=sharing)해주세요
+다운로드는 [여기를 클릭](https://drive.google.com/file/d/1C88YKFGgPxj2xEEHU-Fnw_U8Waqruwde/view?usp=sharing)해주세요
 
 ### 사용 전 설정사항
 
