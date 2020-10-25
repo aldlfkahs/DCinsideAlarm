@@ -1,3 +1,17 @@
+=================해결 방법
+pycharm의 external tools 이용하여 해결
+참조: https://astrocosmos.tistory.com/158
+
+File -> setting -> tools -> external tools
+
+CLI와 같이 각종 명령 인수 넣어주면 됨
+
+이미지의 경우, 절대경로를 적어줘야 exe파일로 만들 때 적용이 제대로 됨
+
+
+
+=================이전 방법(실패)
+
 1. 개발자 pip 설치
 (pip uninstall pyinstaller)
 pip install https://github.com/pyinstaller/pyinstaller/archive/develop.zip
@@ -5,12 +19,6 @@ pip install https://github.com/pyinstaller/pyinstaller/archive/develop.zip
 2. 아래 명령어 실행
 pyinstaller --hidden-import=pkg_resources.py2_warn --onefile --windowed --icon "C:/Users/SeungWon/PycharmProjects/DCinsideAlarm/icon.ico" --add-data "C:/Users/SeungWon/PycharmProjects/DCinsideAlarm/dc_image.ico;." --add-data "C:/Users/SeungWon/PycharmProjects/DCinsideAlarm/icon.png;." ""
 
-
-
-
-
 pyinstaller --hidden-import=pkg_resources.py2_warn --onefile --windowed --icon "icon.ico" --add-data "dc_image.ico;." --add-data "icon.png;." ""
-
-
 
 https://xn--lg3bt3ss6d.com/7 --> https://github.com/pyinstaller/pyinstaller/issues/2152
