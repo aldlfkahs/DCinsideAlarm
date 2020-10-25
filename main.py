@@ -7,13 +7,13 @@
       https://wikidocs.net/4238
       https://www.element14.com/community/thread/57051/l/how-to-break-out-of-a-while-true-loop-with-a-button?displayFullThread=true
       https://stackoverflow.com/questions/37815371/pyinstaller-failed-to-execute-script-pyi-rth-pkgres-and-missing-packages
-
+      https://stackoverflow.com/questions/16511337/correct-way-to-try-except-using-python-requests-module
 '''
 '''
 사용 전 필수 설정사항
 
-시작->설정->시스템->알림 및 동작
-앱 및 다른 보낸사람의 알림 받기 -> 켬
+시작 -> 설정 -> 시스템 -> 알림 및 작업 
+-> 앱 및 다른 보낸사람의 알림 받기 -> 켬
 '''
 import sys
 from PyQt5.QtWidgets import *
@@ -33,12 +33,13 @@ def get_html(url):
    _html = ""
    suc = False
    while(suc == False):
-       resp = requests.get(url,headers=user_agent)
-       if resp.status_code == 200:
-          _html = resp.text
-          break
-       else:
+       try:
+        resp = requests.get(url,headers=user_agent)
+       except requests.exceptions.RequestException as e:
            time.sleep(10)
+           continue
+       suc = True
+       _html = resp.text
    return _html
 
 class MyApp(QWidget):
