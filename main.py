@@ -36,10 +36,15 @@ def get_html(url):
        try:
         resp = requests.get(url,headers=user_agent)
        except requests.exceptions.RequestException as e:
-           time.sleep(10)
+           time.sleep(5)
            continue
-       suc = True
-       _html = resp.text
+
+       if resp.status_code == 200:
+           suc = True
+           _html = resp.text
+       else:
+           suc = True
+           _html = "<tbody><td>잘못된 주소 입니다.</td></tbody>"
    return _html
 
 class MyApp(QWidget):
