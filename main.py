@@ -36,7 +36,7 @@ def get_html(url):
        try:
         resp = requests.get(url,headers=user_agent)
        except requests.exceptions.RequestException as e:
-           time.sleep(5)
+           time.sleep(3)
            continue
 
        if resp.status_code == 200:
@@ -99,9 +99,13 @@ class MyApp(QWidget):
       global recent
       recent = 1
 
+
       for idx in l:
+          if (idx.text == "AD" or idx.text == "이슈" or idx.text == "뉴스" or idx.text == "공지"):
+              continue
           if (recent < int(idx.text)):
               recent = int(idx.text)
+
 
       QMessageBox.about(self, "실행", "알림이 시작 되었습니다.\n이 창을 닫으셔도 좋습니다.")
 
@@ -120,6 +124,9 @@ class MyApp(QWidget):
               n_idx = 0
 
               for n in new_num:
+                  if (n.text == "AD" or n.text == "이슈" or n.text == "뉴스" or n.text == "공지"):
+                      n_idx = n_idx + 1
+                      continue
                   if (int(n.text) > recent):
                       recent = int(n.text)
 
