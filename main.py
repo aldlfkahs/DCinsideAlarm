@@ -101,7 +101,7 @@ class MyApp(QWidget):
 
 
       for idx in l:
-          if (idx.text == "AD" or idx.text == "이슈" or idx.text == "뉴스" or idx.text == "공지"):
+          if (not idx.text.isdecimal()):
               continue
           if (recent < int(idx.text)):
               recent = int(idx.text)
@@ -124,7 +124,7 @@ class MyApp(QWidget):
               n_idx = 0
 
               for n in new_num:
-                  if (n.text == "AD" or n.text == "이슈" or n.text == "뉴스" or n.text == "공지"):
+                  if (not n.text.isdecimal()):
                       n_idx = n_idx + 1
                       continue
                   if (int(n.text) > recent):
