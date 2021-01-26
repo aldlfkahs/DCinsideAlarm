@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5c7a412d-946f-4914-8f06-27330373857a" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/DCinsideAlarm/DCinsideAlarm.exe.manifest" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/DCinsideAlarm/base_library.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/DCinsideAlarm.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DCinsideAlarm.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.spec" beforeDir="false" afterPath="$PROJECT_DIR$/build/.spec/.spec" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/.spec/base_library.zip" beforeDir="false" afterPath="$PROJECT_DIR$/build/.spec/base_library.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/Analysis-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/Analysis-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/EXE-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/EXE-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/PKG-00.pkg" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PKG-00.pkg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/PKG-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PKG-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/PYZ-00.pyz" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PYZ-00.pyz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/PYZ-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PYZ-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/warn-main.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/warn-main.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/xref-main.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/xref-main.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/.spec" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/build/.spec/.spec.exe.manifest" beforeDir="false" afterPath="$PROJECT_DIR$/build/.spec/build/.spec/.spec.exe.manifest" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/build/.spec/base_library.zip" beforeDir="false" afterPath="$PROJECT_DIR$/build/.spec/build/.spec/base_library.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dist/main.exe" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.spec" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyinstaller 오류 해결법.txt" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
+  </component>
+  <component name="ProjectId" id="1jNFsjofaYEZSbG3a1jEoISH4MI" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="settings.editor.selected.configurable" value="preferences.externalTools" />
+  </component>
+  <component name="RunManager">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="DCinsideAlarm" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.main" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5c7a412d-946f-4914-8f06-27330373857a" name="Default Changelist" comment="" />
+      <created>1603636850799</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1603636850799</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="663" y="320" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1611670671821">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="663" y="320" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670671821" />
+    <state x="496" y="285" key="#com.intellij.tools.ToolEditorDialog" timestamp="1603707798172">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="496" y="285" key="#com.intellij.tools.ToolEditorDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1603707798172" />
+    <state width="1899" height="234" key="GridCell.Tab.0.bottom" timestamp="1611670837942">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="234" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670837942" />
+    <state width="1899" height="234" key="GridCell.Tab.0.center" timestamp="1611670837942">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="234" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670837942" />
+    <state width="1899" height="234" key="GridCell.Tab.0.left" timestamp="1611670837942">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="234" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670837942" />
+    <state width="1899" height="234" key="GridCell.Tab.0.right" timestamp="1611670837942">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="234" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670837942" />
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1611588072241">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611588072241" />
+    <state width="1899" height="348" key="GridCell.Tab.1.center" timestamp="1611588072241">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611588072241" />
+    <state width="1899" height="348" key="GridCell.Tab.1.left" timestamp="1611588072241">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611588072241" />
+    <state width="1899" height="348" key="GridCell.Tab.1.right" timestamp="1611588072241">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611588072241" />
+    <state x="262" y="182" key="SettingsEditor" timestamp="1603707798899">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="262" y="182" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1603707798899" />
+    <state x="765" y="433" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611670640763">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="765" y="433" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670640763" />
+    <state x="667" y="307" key="git4idea.merge.GitPullDialog" timestamp="1611670658981">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="667" y="307" key="git4idea.merge.GitPullDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670658981" />
+  </component>
+</project>
