@@ -19,28 +19,11 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c7a412d-946f-4914-8f06-27330373857a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/DCinsideAlarm/DCinsideAlarm.exe.manifest" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/DCinsideAlarm/base_library.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/DCinsideAlarm.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/DCinsideAlarm.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.spec" beforeDir="false" afterPath="$PROJECT_DIR$/build/.spec/.spec" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/.spec/base_library.zip" beforeDir="false" afterPath="$PROJECT_DIR$/build/.spec/base_library.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/main/Analysis-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/Analysis-00.toc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/main/EXE-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/EXE-00.toc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/main/PKG-00.pkg" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PKG-00.pkg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/main/PKG-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PKG-00.toc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/main/PYZ-00.pyz" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PYZ-00.pyz" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/main/PYZ-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PYZ-00.toc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/main/warn-main.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/warn-main.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/main/xref-main.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/xref-main.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/.spec" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/build/.spec/.spec.exe.manifest" beforeDir="false" afterPath="$PROJECT_DIR$/build/.spec/build/.spec/.spec.exe.manifest" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/build/.spec/base_library.zip" beforeDir="false" afterPath="$PROJECT_DIR$/build/.spec/build/.spec/base_library.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dist/main.exe" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.spec" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyinstaller 오류 해결법.txt" beforeDir="false" />
+    <list default="true" id="5c7a412d-946f-4914-8f06-27330373857a" name="Default Changelist" comment="파이참 깃헙 연동 및 깃헙 정리">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/venv/Lib/site-packages/win10toast/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/venv/Lib/site-packages/win10toast/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/venv/Lib/site-packages/win10toast/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/venv/Lib/site-packages/win10toast/__main__.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,6 +34,9 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="UPDATE_TYPE" value="REBASE" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/main.py" root0="SKIP_INSPECTION" />
+  </component>
   <component name="ProjectId" id="1jNFsjofaYEZSbG3a1jEoISH4MI" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -59,7 +45,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="settings.editor.selected.configurable" value="preferences.externalTools" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
@@ -100,6 +86,14 @@
       <option name="presentableId" value="Default" />
       <updated>1603636850799</updated>
     </task>
+    <task id="LOCAL-00001" summary="파이참 깃헙 연동 및 깃헙 정리">
+      <created>1611671158265</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1611671158265</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -112,6 +106,11 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="파이참 깃헙 연동 및 깃헙 정리" />
+    <option name="LAST_COMMIT_MESSAGE" value="파이참 깃헙 연동 및 깃헙 정리" />
   </component>
   <component name="WindowStateProjectService">
     <state x="663" y="320" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1611670671821">
@@ -122,22 +121,26 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="496" y="285" key="#com.intellij.tools.ToolEditorDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1603707798172" />
-    <state width="1899" height="234" key="GridCell.Tab.0.bottom" timestamp="1611670837942">
+    <state x="184" y="86" key="DiffContextDialog" timestamp="1611671222997">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="234" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670837942" />
-    <state width="1899" height="234" key="GridCell.Tab.0.center" timestamp="1611670837942">
+    <state x="184" y="86" key="DiffContextDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611671222997" />
+    <state width="1899" height="257" key="GridCell.Tab.0.bottom" timestamp="1611837943604">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="234" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670837942" />
-    <state width="1899" height="234" key="GridCell.Tab.0.left" timestamp="1611670837942">
+    <state width="1899" height="257" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611837943604" />
+    <state width="1899" height="257" key="GridCell.Tab.0.center" timestamp="1611837943604">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="234" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670837942" />
-    <state width="1899" height="234" key="GridCell.Tab.0.right" timestamp="1611670837942">
+    <state width="1899" height="257" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611837943604" />
+    <state width="1899" height="257" key="GridCell.Tab.0.left" timestamp="1611837943604">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="234" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670837942" />
+    <state width="1899" height="257" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611837943604" />
+    <state width="1899" height="257" key="GridCell.Tab.0.right" timestamp="1611837943604">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="257" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611837943604" />
     <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1611588072241">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -154,10 +157,14 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611588072241" />
-    <state x="262" y="182" key="SettingsEditor" timestamp="1603707798899">
+    <state x="262" y="182" key="SettingsEditor" timestamp="1611833331129">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="262" y="182" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1603707798899" />
+    <state x="262" y="182" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611833331129" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1611671231242">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611671231242" />
     <state x="765" y="433" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611670640763">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -166,5 +173,13 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="667" y="307" key="git4idea.merge.GitPullDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670658981" />
+    <state x="747" y="419" key="git4idea.remote.GitConfigureRemotesDialog" timestamp="1611671427887">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="747" y="419" key="git4idea.remote.GitConfigureRemotesDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611671427887" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1611671335414">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611671335414" />
   </component>
 </project>
