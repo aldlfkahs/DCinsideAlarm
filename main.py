@@ -110,7 +110,7 @@ class MyApp(QWidget):
 
       self.setWindowTitle('DC 새글 알리미')
       self.setWindowIcon(QIcon('icon.png'))
-      self.setFixedSize(380, 200)
+      #self.setFixedSize(380, 200)
       self.show()
 
   def center(self):
