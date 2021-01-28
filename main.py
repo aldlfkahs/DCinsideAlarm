@@ -110,7 +110,7 @@ class MyApp(QWidget):
 
       self.setWindowTitle('DC 새글 알리미')
       self.setWindowIcon(QIcon('icon.png'))
-      self.setFixedSize(380, 200)
+      #self.setFixedSize(380, 200)
       self.show()
 
   def center(self):
@@ -168,9 +168,9 @@ class MyApp(QWidget):
                   # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
                   if (int(n.text) > recent):
                       recent = int(n.text)
-                      name = new_name[size-n_idx].text
-                      title = new_title[size-n_idx].text
-                      link = new_title[size-n_idx].a.attrs['href']
+                      name = new_name[size-n_idx-1].text
+                      title = new_title[size-n_idx-1].text
+                      link = new_title[size-n_idx-1].a.attrs['href']
                       # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                       if k_off.isChecked():
                           toaster.show_toast(title, name, icon_path="dc_image.ico", duration=4, callback_on_click=action)
