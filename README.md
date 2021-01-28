@@ -6,11 +6,12 @@
 디씨인사이드 특정 갤러리에 새로운 글이 올라오면 윈도우10 팝업 메시지로 알려주는 프로그램입니다.  
 새 글 알림을 받고 싶은 갤러리의 메인 페이지 주소를 적은 뒤, 시작 버튼을 누르면 됩니다.  
 __반드시 사용 전 설정사항과 주의사항을 읽으신 뒤에 사용해주세요!__  
-다운로드는 [__여기를 클릭__](https://drive.google.com/file/d/1TJrlo1JXazjoaW-IDdxENlK91i6wqYua/view?usp=sharing)해주세요.  (비밀번호 : 11037)  
+다운로드는 [__여기를 클릭__](https://drive.google.com/file/d/1YE_8CTgxWFmGAMK-8XTLc-HpVjpjpdLn/view?usp=sharing)해주세요.  (비밀번호 : 11037)  
 
 ### 사용법
 1. 알림을 받고 싶은 갤러리의 메인 페이지 주소를 '갤러리 주소'칸에 적습니다.  
 2. 시작 버튼을 누르면 알림이 시작 됩니다.  
+3. 알림 메시지 클릭시 해당 글이 브라우저로 열립니다.  
 ##### 키워드 알리미 사용법
 1. 키워드 옆에 ON 버튼을 클릭하여 키워드 기능을 활성화 합니다.  
 2. ON/OFF 옆에 있는 텍스트 창에 추가하고 싶은 키워드를 적고, 추가 버튼을 누릅니다.  
@@ -58,4 +59,6 @@ __알림 소리를 끄고 싶다면?__
 ### 문의
 
 이메일 : aldlfkahs95@naver.com  
-블로그 : https://blog.naver.com/aldlfkahs95/222131430934
+블로그 : http://togomi.tistory.com  
+~~https://blog.naver.com/aldlfkahs95/222131430934~~
+        
