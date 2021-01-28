@@ -19,12 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c7a412d-946f-4914-8f06-27330373857a" name="Default Changelist" comment="파이참 깃헙 연동 및 깃헙 정리">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/venv/Lib/site-packages/win10toast/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/venv/Lib/site-packages/win10toast/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/venv/Lib/site-packages/win10toast/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/venv/Lib/site-packages/win10toast/__main__.py" afterDir="false" />
-    </list>
+    <list default="true" id="5c7a412d-946f-4914-8f06-27330373857a" name="Default Changelist" comment="[feat] 클릭 이벤트 추가 ver1.3.1" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,7 +27,6 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/main.py" root0="SKIP_INSPECTION" />
@@ -93,7 +87,28 @@
       <option name="project" value="LOCAL" />
       <updated>1611671158265</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="[feat] 클릭 이벤트 추가 ver1.3.1">
+      <created>1611838384806</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1611838384806</updated>
+    </task>
+    <task id="LOCAL-00003" summary="[feat] 클릭 이벤트 추가 ver1.3.1">
+      <created>1611838402554</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1611838402554</updated>
+    </task>
+    <task id="LOCAL-00004" summary="[feat] 클릭 이벤트 추가 ver1.3.1">
+      <created>1611838415061</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1611838415061</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -110,7 +125,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="파이참 깃헙 연동 및 깃헙 정리" />
-    <option name="LAST_COMMIT_MESSAGE" value="파이참 깃헙 연동 및 깃헙 정리" />
+    <MESSAGE value="[feat] 클릭 이벤트 추가 ver1.3.1" />
+    <option name="LAST_COMMIT_MESSAGE" value="[feat] 클릭 이벤트 추가 ver1.3.1" />
   </component>
   <component name="WindowStateProjectService">
     <state x="663" y="320" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1611670671821">
@@ -125,22 +141,22 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="184" y="86" key="DiffContextDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611671222997" />
-    <state width="1899" height="257" key="GridCell.Tab.0.bottom" timestamp="1611837943604">
+    <state width="1899" height="257" key="GridCell.Tab.0.bottom" timestamp="1611838213667">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="257" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611837943604" />
-    <state width="1899" height="257" key="GridCell.Tab.0.center" timestamp="1611837943604">
+    <state width="1899" height="257" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838213667" />
+    <state width="1899" height="257" key="GridCell.Tab.0.center" timestamp="1611838213667">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="257" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611837943604" />
-    <state width="1899" height="257" key="GridCell.Tab.0.left" timestamp="1611837943604">
+    <state width="1899" height="257" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838213667" />
+    <state width="1899" height="257" key="GridCell.Tab.0.left" timestamp="1611838213667">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="257" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611837943604" />
-    <state width="1899" height="257" key="GridCell.Tab.0.right" timestamp="1611837943604">
+    <state width="1899" height="257" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838213667" />
+    <state width="1899" height="257" key="GridCell.Tab.0.right" timestamp="1611838213667">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="257" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611837943604" />
+    <state width="1899" height="257" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838213667" />
     <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1611588072241">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -161,10 +177,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="262" y="182" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611833331129" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1611671231242">
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1611838439649">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611671231242" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838439649" />
     <state x="765" y="433" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611670640763">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
