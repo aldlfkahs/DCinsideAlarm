@@ -11,6 +11,9 @@
       https://wikidocs.net/21938
       https://wikidocs.net/35496
       https://wikidocs.net/36766
+      https://weejw.tistory.com/264
+      https://github.com/Charnelx/Windows-10-Toast-Notifications
+      https://stackoverflow.com/questions/63867448/interactive-notification-windows-10-using-python
 '''
 '''
 사용 전 필수 설정사항
@@ -24,8 +27,9 @@ from PyQt5.QtGui import QIcon
 import requests
 import time
 import threading
+import webbrowser
 from bs4 import BeautifulSoup
-from win10toast_for_pip_bigger_10 import ToastNotifier
+from win10toast import ToastNotifier
 
 toaster = ToastNotifier()
 user_agent = {'User-agent': 'Mozilla/5.0'}
@@ -65,7 +69,7 @@ class MyApp(QWidget):
       self.addr.setText("https://gall.dcinside.com/mgallery/board/lists?id=aoegame")
 
       text1 = QLabel('갤러리 주소')
-      togomi = QLabel('버전 : 1.3.0')
+      togomi = QLabel('버전 : 1.3.1')
 
       btn1 = QPushButton('시작', self)
       btn1.clicked.connect(self.button1Function)
@@ -107,7 +111,6 @@ class MyApp(QWidget):
       self.setWindowTitle('DC 새글 알리미')
       self.setWindowIcon(QIcon('icon.png'))
       self.setFixedSize(380, 200)
-      self.center()
       self.show()
 
   def center(self):
@@ -142,6 +145,7 @@ class MyApp(QWidget):
       # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
       def run():
           global recent
+          global link
           # 중지버튼으로 flag가 false가 되기 전까지 계속 수행
           while flag == True:
               # 5초 간격으로 get_html() 호출
@@ -156,23 +160,25 @@ class MyApp(QWidget):
 
               # 새로 가져온 리스트의 글 번호들을 비교
               n_idx = 0
-              for n in new_num:
+              size = len(new_num)
+              for n in reversed(new_num):
                   if (not n.text.isdecimal()):
                       n_idx = n_idx + 1
                       continue
                   # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
                   if (int(n.text) > recent):
                       recent = int(n.text)
-                      name = new_name[n_idx].text
-                      title = new_title[n_idx].text
+                      name = new_name[size-n_idx].text
+                      title = new_title[size-n_idx].text
+                      link = new_title[size-n_idx].a.attrs['href']
                       # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                       if k_off.isChecked():
-                          toaster.show_toast(title, name, icon_path="dc_image.ico", duration=5)
+                          toaster.show_toast(title, name, icon_path="dc_image.ico", duration=4, callback_on_click=action)
                       # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
                       if k_on.isChecked():
                           for key in range(keyword.count()):
                               if keyword.item(key).text() in title:
-                                  toaster.show_toast(title, name, icon_path="dc_image.ico", duration=5)
+                                  toaster.show_toast(title, name, icon_path="dc_image.ico", duration=4, callback_on_click=action)
                                   break
                   n_idx = n_idx + 1
               if flag == False:
@@ -180,6 +186,11 @@ class MyApp(QWidget):
 
       thread = threading.Thread(target=run)
       thread.start()
+
+      # 클릭 시, 웹 브라우저로 연결해주는 함수
+      def action():
+          full_link = "https://gall.dcinside.com" + link
+          webbrowser.open_new(full_link)
 
   # 중지 버튼
   def button2Function(self):
