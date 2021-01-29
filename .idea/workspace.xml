@@ -19,7 +19,18 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c7a412d-946f-4914-8f06-27330373857a" name="Default Changelist" comment="[feat] 클릭 이벤트 추가 ver1.3.1" />
+    <list default="true" id="5c7a412d-946f-4914-8f06-27330373857a" name="Default Changelist" comment="ver1.3.2 업데이트">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/Analysis-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/Analysis-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/EXE-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/EXE-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/PKG-00.pkg" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PKG-00.pkg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/PKG-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PKG-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/PYZ-00.pyz" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PYZ-00.pyz" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/PYZ-00.toc" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/PYZ-00.toc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/base_library.zip" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/base_library.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/warn-main.txt" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/warn-main.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/main/xref-main.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/main/xref-main.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,6 +38,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GithubDefaultAccount">
+    <option name="defaultAccountId" value="4d7cf997-87b3-4f7e-bc9d-e03c311c57a2" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/main.py" root0="SKIP_INSPECTION" />
@@ -39,7 +53,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.CommitDialog" />
   </component>
   <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
@@ -108,7 +122,35 @@
       <option name="project" value="LOCAL" />
       <updated>1611838415061</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="[feat] 클릭 이벤트 추가 ver1.3.1">
+      <created>1611838544524</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1611838544524</updated>
+    </task>
+    <task id="LOCAL-00006" summary="[mod] 버그수정">
+      <created>1611851025926</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1611851025926</updated>
+    </task>
+    <task id="LOCAL-00007" summary="[mod] 주기 감소, 중지 버튼 버그 픽스">
+      <created>1611924669770</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1611924669770</updated>
+    </task>
+    <task id="LOCAL-00008" summary="ver1.3.2 업데이트">
+      <created>1611925242809</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1611925242809</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -126,7 +168,10 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="파이참 깃헙 연동 및 깃헙 정리" />
     <MESSAGE value="[feat] 클릭 이벤트 추가 ver1.3.1" />
-    <option name="LAST_COMMIT_MESSAGE" value="[feat] 클릭 이벤트 추가 ver1.3.1" />
+    <MESSAGE value="[mod] 버그수정" />
+    <MESSAGE value="[mod] 주기 감소, 중지 버튼 버그 픽스" />
+    <MESSAGE value="ver1.3.2 업데이트" />
+    <option name="LAST_COMMIT_MESSAGE" value="ver1.3.2 업데이트" />
   </component>
   <component name="WindowStateProjectService">
     <state x="663" y="320" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1611670671821">
@@ -141,22 +186,30 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="184" y="86" key="DiffContextDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611671222997" />
-    <state width="1899" height="257" key="GridCell.Tab.0.bottom" timestamp="1611838213667">
+    <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1611926125351">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="257" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838213667" />
-    <state width="1899" height="257" key="GridCell.Tab.0.center" timestamp="1611838213667">
+    <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611926125351" />
+    <state width="1899" height="257" key="GridCell.Tab.0.bottom" timestamp="1611925394318">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="257" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838213667" />
-    <state width="1899" height="257" key="GridCell.Tab.0.left" timestamp="1611838213667">
+    <state width="1899" height="257" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611925394318" />
+    <state width="1899" height="257" key="GridCell.Tab.0.bottom/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1611851656421" />
+    <state width="1899" height="257" key="GridCell.Tab.0.center" timestamp="1611925394317">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="257" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838213667" />
-    <state width="1899" height="257" key="GridCell.Tab.0.right" timestamp="1611838213667">
+    <state width="1899" height="257" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611925394317" />
+    <state width="1899" height="257" key="GridCell.Tab.0.center/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1611851656420" />
+    <state width="1899" height="257" key="GridCell.Tab.0.left" timestamp="1611925394317">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="257" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838213667" />
+    <state width="1899" height="257" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611925394317" />
+    <state width="1899" height="257" key="GridCell.Tab.0.left/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1611851656420" />
+    <state width="1899" height="257" key="GridCell.Tab.0.right" timestamp="1611925394318">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="257" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611925394318" />
+    <state width="1899" height="257" key="GridCell.Tab.0.right/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1611851656420" />
     <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1611588072241">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -173,29 +226,31 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1899" height="348" key="GridCell.Tab.1.right/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611588072241" />
-    <state x="262" y="182" key="SettingsEditor" timestamp="1611833331129">
+    <state x="262" y="182" key="SettingsEditor" timestamp="1611926101979">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="262" y="182" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611833331129" />
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1611838439649">
+    <state x="262" y="182" key="SettingsEditor/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611926101979" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2" timestamp="1611925250454">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611838439649" />
+    <state x="552" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611925250454" />
+    <state x="2472" y="253" key="Vcs.Push.Dialog.v2/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1611851124018" />
     <state x="765" y="433" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1611670640763">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="765" y="433" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670640763" />
-    <state x="667" y="307" key="git4idea.merge.GitPullDialog" timestamp="1611670658981">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="2587" y="307" key="git4idea.merge.GitPullDialog" timestamp="1611851048695">
+      <screen x="1920" y="0" width="1920" height="1040" />
     </state>
     <state x="667" y="307" key="git4idea.merge.GitPullDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611670658981" />
+    <state x="2587" y="307" key="git4idea.merge.GitPullDialog/0.0.1920.1040/1920.0.1920.1040@1920.0.1920.1040" timestamp="1611851048695" />
     <state x="747" y="419" key="git4idea.remote.GitConfigureRemotesDialog" timestamp="1611671427887">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="747" y="419" key="git4idea.remote.GitConfigureRemotesDialog/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611671427887" />
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1611671335414">
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1611926161078">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611671335414" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.0.1920.1040@0.0.1920.1040" timestamp="1611926161078" />
   </component>
 </project>
