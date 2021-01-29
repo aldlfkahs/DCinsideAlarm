@@ -69,7 +69,7 @@ class MyApp(QWidget):
       self.addr.setText("https://gall.dcinside.com/mgallery/board/lists?id=aoegame")
 
       text1 = QLabel('갤러리 주소')
-      togomi = QLabel('버전 : 1.3.1')
+      togomi = QLabel('버전 : 1.3.2')
 
       btn1 = QPushButton('시작', self)
       btn1.clicked.connect(self.button1Function)
@@ -146,10 +146,15 @@ class MyApp(QWidget):
       def run():
           global recent
           global link
+          skip = False
           # 중지버튼으로 flag가 false가 되기 전까지 계속 수행
           while flag == True:
-              # 5초 간격으로 get_html() 호출
-              time.sleep(5)
+              # 3초 간격으로 get_html() 호출
+              if not skip :
+                  time.sleep(3)
+              else:
+                  skip = False
+
               html = get_html(self.addr.text())
               sp = BeautifulSoup(html, 'html.parser')
               new_post = sp.find("tbody")
@@ -162,6 +167,8 @@ class MyApp(QWidget):
               n_idx = 0
               size = len(new_num)
               for n in reversed(new_num):
+                  if flag == False:
+                      break
                   if (not n.text.isdecimal()):
                       n_idx = n_idx + 1
                       continue
@@ -173,12 +180,14 @@ class MyApp(QWidget):
                       link = new_title[size-n_idx-1].a.attrs['href']
                       # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                       if k_off.isChecked():
-                          toaster.show_toast(title, name, icon_path="dc_image.ico", duration=4, callback_on_click=action)
+                          toaster.show_toast(title, name, icon_path="dc_image.ico", duration=3, callback_on_click=action)
+                          skip = True
                       # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
                       if k_on.isChecked():
                           for key in range(keyword.count()):
                               if keyword.item(key).text() in title:
-                                  toaster.show_toast(title, name, icon_path="dc_image.ico", duration=4, callback_on_click=action)
+                                  toaster.show_toast(title, name, icon_path="dc_image.ico", duration=3, callback_on_click=action)
+                                  skip = True
                                   break
                   n_idx = n_idx + 1
               if flag == False:
