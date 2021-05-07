@@ -69,5 +69,5 @@ __알림 소리를 끄고 싶다면?__
 ### 문의
 
 이메일 : aldlfkahs95@naver.com  
-블로그 : https://blog.naver.com/aldlfkahs95/222131430934
+블로그 : https://togomi.tistory.com/12
         
