@@ -77,7 +77,7 @@ class MyApp(QWidget):
       self.addr.setText("https://gall.dcinside.com/mgallery/board/lists?id=aoegame")
 
       text1 = QLabel('갤러리 주소')
-      togomi = QLabel('버전 : 1.3.2')
+      togomi = QLabel('버전 : 1.4.0')
 
       # 시작/중지 버튼
       btn1 = QPushButton('시작', self)
