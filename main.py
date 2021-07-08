@@ -1,6 +1,7 @@
 '''
 제작자 이메일 : aldlfkahs95@naver.com
-참조 : https://github.com/jithurjacob/Windows-10-Toast-Notifications
+제작자 블로그 : https://togomi.tistory.com/
+참고 : https://github.com/jithurjacob/Windows-10-Toast-Notifications
       https://medium.com/@mjhans83/%ED%8C%8C%EC%9D%B4%EC%8D%AC%EC%9C%BC%EB%A1%9C-%ED%81%AC%EB%A1%A4%EB%A7%81-%ED%95%98%EA%B8%B0-908e78ee09e0
       http://blog.naver.com/PostView.nhn?blogId=dbstjdans123&logNo=221163430022&categoryNo=23&parentCategoryNo=-1&viewDate=&currentPage=&postListTopCurrentPage=&isAfterWrite=true
       https://stackoverflow.com/questions/56695061/is-there-any-way-to-disable-the-notification-sound-on-win10toast-python-library
@@ -14,6 +15,10 @@
       https://weejw.tistory.com/264
       https://github.com/Charnelx/Windows-10-Toast-Notifications
       https://stackoverflow.com/questions/63867448/interactive-notification-windows-10-using-python
+      https://cjsal95.tistory.com/35
+      https://m.blog.naver.com/scyan2011/221723880069
+      https://m.blog.naver.com/scyan2011/221723880069
+      https://wikidocs.net/26
 '''
 '''
 사용 전 필수 설정사항
@@ -30,6 +35,8 @@ import threading
 import webbrowser
 from bs4 import BeautifulSoup
 from win10toast import ToastNotifier
+import tkinter
+from tkinter import filedialog
 
 toaster = ToastNotifier()
 user_agent = {'User-agent': 'Mozilla/5.0'}
@@ -61,6 +68,7 @@ class MyApp(QWidget):
       super().__init__()
       self.initUI()
 
+  # UI 설정
   def initUI(self):
       grid = QGridLayout()
       self.setLayout(grid)
@@ -71,6 +79,7 @@ class MyApp(QWidget):
       text1 = QLabel('갤러리 주소')
       togomi = QLabel('버전 : 1.3.2')
 
+      # 시작/중지 버튼
       btn1 = QPushButton('시작', self)
       btn1.clicked.connect(self.button1Function)
       btn2 = QPushButton('중지', self)
@@ -81,20 +90,29 @@ class MyApp(QWidget):
       global keyword
       keyword = QListWidget()
 
+      # 키워드 온/오프 버튼
       global k_on, k_off
       k_on = QRadioButton('ON', self)
       k_off = QRadioButton('OFF', self)
       k_off.setChecked(True)
 
+      # 추가할 키워드 적는 칸
       global newItem
       newItem = QLineEdit()
 
+      # 키워드 추가/삭제 버튼
       btn3 = QPushButton('추가', self)
       btn3.clicked.connect(self.button3Function)
       btn4 = QPushButton('삭제', self)
       btn4.clicked.connect(self.button4Function)
 
+      # 키워드 저장/불러오기 버튼
+      btn5 = QPushButton('저장', self)
+      btn5.clicked.connect(self.button5Function)
+      btn6 = QPushButton('불러오기', self)
+      btn6.clicked.connect(self.button6Function)
 
+      # 위에서 선언한 위젯들의 위치를 지정
       grid.addWidget(text1, 0, 0)
       grid.addWidget(togomi, 0, 4)
       grid.addWidget(self.addr, 1, 0, 1, 5)
@@ -107,6 +125,8 @@ class MyApp(QWidget):
       grid.addWidget(keyword, 4, 0, -1, 4)
       grid.addWidget(btn3, 4, 4)
       grid.addWidget(btn4, 5, 4)
+      grid.addWidget(btn5, 6, 4)
+      grid.addWidget(btn6, 7, 4)
 
       self.setWindowTitle('DC 새글 알리미')
       self.setWindowIcon(QIcon('icon.png'))
@@ -216,6 +236,53 @@ class MyApp(QWidget):
   def button4Function(self):
       select = keyword.currentRow()
       keyword.takeItem(select)
+
+  # 키워드 저장 버튼
+  def button5Function(self):
+      root = tkinter.Tk()
+      root.withdraw()
+      file_path = filedialog.asksaveasfile(parent=root, title="키워드 저장", filetypes=(("text files", "*.txt"),("all files", "*.txt")), defaultextension="txt")
+      if file_path is None:
+          # 저장이 안 됐을 시, 예외 처리
+          return
+      else:
+          # 키워드를 파일로 저장
+          file_path.write("[갤러리 주소]\n")
+          file_path.write(self.addr.text() + "\n")
+          file_path.write("[키워드]\n")
+          for key in range(keyword.count()):
+              file_path.write(keyword.item(key).text() + "\n")
+
+  # 키워드 불러오기 버튼
+  def button6Function(self):
+      root = tkinter.Tk()
+      root.withdraw()
+      file_path = filedialog.askopenfilename(parent=root, title="키워드 불러오기", filetypes=(("text files", "*.txt"),("all files", "*.txt")), defaultextension="txt")
+      if file_path == "":
+          # 아무것도 안 불러왔을 시, 예외 처리
+          return
+      else:
+          data = open(file_path, 'r')
+          isURL = data.readline().rstrip('\n')
+          # 갤러리 주소 불러오기
+          if isURL != "[갤러리 주소]":
+              # 첫 줄이 [갤러리 주소]가 아니라면, 잘못된 파일을 읽은 것으로 판단
+              return
+          else:
+              self.addr.setText(data.readline().rstrip('\n'))
+
+          # 키워드 불러오기
+          isKeyword = data.readline().rstrip('\n')
+          if isKeyword != "[키워드]":
+              # [키워드]가 아니라면, 잘못된 파일을 읽은 것으로 판단
+              return
+          else:
+              lines = data.readlines()
+              keyword.clear() # 불러오기 전, 이전에 있던 키워드 삭제
+              for line in lines:
+                  keyword.addItem(line.rstrip('\n'))
+
+          data.close()
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
