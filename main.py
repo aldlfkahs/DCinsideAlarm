@@ -19,6 +19,7 @@
       https://m.blog.naver.com/scyan2011/221723880069
       https://m.blog.naver.com/scyan2011/221723880069
       https://wikidocs.net/26
+      https://stackoverflow.com/questions/22726860/beautifulsoup-webscraping-find-all-finding-exact-match
 '''
 '''
 사용 전 필수 설정사항
@@ -74,9 +75,9 @@ class MyApp(QWidget):
       self.setLayout(grid)
 
       self.addr = QLineEdit("", self)
-      self.addr.setText("https://gall.dcinside.com/mgallery/board/lists?id=aoegame")
+      self.addr.setText("https://arca.live/b/counterside")
 
-      text1 = QLabel('갤러리 주소')
+      text1 = QLabel('채널 주소')
       togomi = QLabel('버전 : 1.4.0')
 
       # 시작/중지 버튼
@@ -128,7 +129,7 @@ class MyApp(QWidget):
       grid.addWidget(btn5, 6, 4)
       grid.addWidget(btn6, 7, 4)
 
-      self.setWindowTitle('DC 새글 알리미')
+      self.setWindowTitle('아카라이브 새글 알리미')
       self.setWindowIcon(QIcon('icon.png'))
       #self.setFixedSize(380, 200)
       self.show()
@@ -148,17 +149,18 @@ class MyApp(QWidget):
       soup = BeautifulSoup(html, 'html.parser')
 
       # 받아온 html에서 글 번호만 파싱
-      l = soup.find("tbody").find_all("td", class_="gall_num")
+      l = soup.find("body").find_all("span", class_="vcol col-id")
 
       # recent 변수에 현재 최신 글 번호를 저장
       global recent
       recent = 1
 
       for idx in l:
-          if (not idx.text.isdecimal()):
+          num = idx.text.strip()
+          if (not num.isdecimal()):
               continue
-          if (recent < int(idx.text)):
-              recent = int(idx.text)
+          if (recent < int(num)):
+              recent = int(num)
 
       QMessageBox.about(self, "실행", "알림이 시작 되었습니다.\n이 창을 닫으셔도 좋습니다.")
 
@@ -177,36 +179,38 @@ class MyApp(QWidget):
 
               html = get_html(self.addr.text())
               sp = BeautifulSoup(html, 'html.parser')
-              new_post = sp.find("tbody")
+              new_post = sp.find("body")
 
-              new_title = new_post.find_all("td", class_="gall_tit ub-word")
-              new_name = new_post.find_all("td", class_="gall_writer ub-writer")
-              new_num = new_post.find_all("td", class_="gall_num")
+              new_title = new_post.find_all("span", class_="vcol col-title")
+              new_name = new_post.find_all("span", class_="vcol col-author")
+              new_num = new_post.find_all("span", class_="vcol col-id")
+              new_link = new_post.find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow']) # 정확히 vrow라는 이름의 class만 가져오기 위해
 
               # 새로 가져온 리스트의 글 번호들을 비교
               n_idx = 0
               size = len(new_num)
+              link_size = len(new_link)
               for n in reversed(new_num):
                   if flag == False:
                       break
-                  if (not n.text.isdecimal()):
+                  if (not n.text.strip().isdecimal()):
                       n_idx = n_idx + 1
                       continue
                   # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
-                  if (int(n.text) > recent):
-                      recent = int(n.text)
-                      name = new_name[size-n_idx-1].text
-                      title = new_title[size-n_idx-1].text
-                      link = new_title[size-n_idx-1].a.attrs['href']
+                  if (int(n.text.strip()) > recent):
+                      recent = int(n.text.strip())
+                      name = new_name[size-n_idx-1].text.strip()
+                      title = new_title[size-n_idx-1].text.strip()
+                      link = new_link[link_size-n_idx-1].attrs['href']
                       # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                       if k_off.isChecked():
-                          toaster.show_toast(title, name, icon_path="dc_image.ico", duration=3, callback_on_click=action)
+                          toaster.show_toast(title, name, icon_path="arca_image.ico", duration=3, callback_on_click=action)
                           skip = True
                       # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
                       if k_on.isChecked():
                           for key in range(keyword.count()):
                               if keyword.item(key).text() in title:
-                                  toaster.show_toast(title, name, icon_path="dc_image.ico", duration=3, callback_on_click=action)
+                                  toaster.show_toast(title, name, icon_path="arca_image.ico", duration=3, callback_on_click=action)
                                   skip = True
                                   break
                   n_idx = n_idx + 1
@@ -218,7 +222,7 @@ class MyApp(QWidget):
 
       # 클릭 시, 웹 브라우저로 연결해주는 함수
       def action():
-          full_link = "https://gall.dcinside.com" + link
+          full_link = "https://arca.live" + link
           webbrowser.open_new(full_link)
 
   # 중지 버튼
@@ -247,7 +251,7 @@ class MyApp(QWidget):
           return
       else:
           # 키워드를 파일로 저장
-          file_path.write("[갤러리 주소]\n")
+          file_path.write("[채널 주소]\n")
           file_path.write(self.addr.text() + "\n")
           file_path.write("[키워드]\n")
           for key in range(keyword.count()):
@@ -264,9 +268,9 @@ class MyApp(QWidget):
       else:
           data = open(file_path, 'r')
           isURL = data.readline().rstrip('\n')
-          # 갤러리 주소 불러오기
-          if isURL != "[갤러리 주소]":
-              # 첫 줄이 [갤러리 주소]가 아니라면, 잘못된 파일을 읽은 것으로 판단
+          # 채널 주소 불러오기
+          if isURL != "[채널 주소]":
+              # 첫 줄이 [채널 주소]가 아니라면, 잘못된 파일을 읽은 것으로 판단
               return
           else:
               self.addr.setText(data.readline().rstrip('\n'))
