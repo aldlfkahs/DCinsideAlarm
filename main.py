@@ -78,7 +78,7 @@ class MyApp(QWidget):
       self.addr.setText("https://arca.live/b/counterside")
 
       text1 = QLabel('채널 주소')
-      togomi = QLabel('버전 : 1.4.0')
+      togomi = QLabel('버전 : 1.4.1')
 
       # 시작/중지 버튼
       btn1 = QPushButton('시작', self)
