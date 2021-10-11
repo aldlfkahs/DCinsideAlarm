@@ -4,10 +4,10 @@
 block_cipher = None
 
 
-a = Analysis(['main_v1.4.6-rtfm.py'],
-             pathex=['C:\\Users\\user\\Desktop\\ArcaliveAlarm'],
+a = Analysis(['..\\main.py'],
+             pathex=['C:\\Users\\user\\Desktop\\DCinsideAlarm\\32bit'],
              binaries=[],
-             datas=[('icon.png', '.'), ('arca_image.ico', '.')],
+             datas=[('..\\icon.png', '.'), ('..\\arca_image.ico', '.')],
              hiddenimports=[],
              hookspath=[],
              hooksconfig={},
@@ -37,4 +37,4 @@ exe = EXE(pyz,
           disable_windowed_traceback=False,
           target_arch=None,
           codesign_identity=None,
-          entitlements_file=None , icon='icon.ico')
+          entitlements_file=None , icon='..\\icon.ico')
