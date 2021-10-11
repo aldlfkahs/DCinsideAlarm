@@ -1,0 +1,23 @@
+[32비트 버전]
+현재 디렉토리를 32bit 폴더로 변경
+cd 32bit
+# 32비트 가상환경 설치
+conda env create -f environment_py38_32.yml -p .\py38_32
+# 가상환경 활성화
+conda activate .\py38_32
+# 32비트 버전 exe파일 포팅
+pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="아카라이브 새글알리미 32bit.exe" ..\main.py
+# 가상환경 비활성화
+conda deactivate
+
+[64비트 버전]
+# 현재 디렉토리를 64bit 폴더로 변경
+cd 64bit
+# 64비트 가상환경 설치
+conda env create -f environment_py38_64.yml -p .\py38_64
+# 가상환경 활성화
+conda activate .\py38_64
+# 64비트 버전 exe파일 포팅
+pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="아카라이브 새글알리미 64bit.exe" ..\main.py
+# 가상환경 비활성화
+conda deactivate
