@@ -46,249 +46,249 @@ recent = 1
 
 # url로 get 요청을 보내는 함수
 def get_html(url):
-   _html = ""
-   suc = False
-   while(suc == False):
-       try:
-        resp = requests.get(url,headers=user_agent)
-       except requests.exceptions.RequestException as e:
-           time.sleep(3)
-           continue
+    _html = ""
+    suc = False
+    while(suc == False):
+        try:
+            resp = requests.get(url,headers=user_agent)
+        except requests.exceptions.RequestException as e:
+            time.sleep(3)
+            continue
 
-       if resp.status_code == 200:
-           suc = True
-           _html = resp.text
-       else:
-           suc = True
-           _html = "<tbody><td>잘못된 주소 입니다.</td></tbody>"
-   return _html
+        if resp.status_code == 200:
+            suc = True
+            _html = resp.text
+        else:
+            suc = True
+            _html = "<tbody><td>잘못된 주소 입니다.</td></tbody>"
+    return _html
 
 class MyApp(QWidget):
 
-  def __init__(self):
-      super().__init__()
-      self.initUI()
+    def __init__(self):
+        super().__init__()
+        self.initUI()
 
-  # UI 설정
-  def initUI(self):
-      grid = QGridLayout()
-      self.setLayout(grid)
+    # UI 설정
+    def initUI(self):
+        grid = QGridLayout()
+        self.setLayout(grid)
 
-      self.addr = QLineEdit("", self)
-      self.addr.setText("https://arca.live/b/counterside")
+        self.addr = QLineEdit("", self)
+        self.addr.setText("https://arca.live/b/counterside")
 
-      text1 = QLabel('채널 주소')
-      togomi = QLabel('버전 : 1.4.1')
+        text1 = QLabel('채널 주소')
+        togomi = QLabel('버전 : 1.4.1')
 
-      # 시작/중지 버튼
-      btn1 = QPushButton('시작', self)
-      btn1.clicked.connect(self.button1Function)
-      btn2 = QPushButton('중지', self)
-      btn2.clicked.connect(self.button2Function)
+        # 시작/중지 버튼
+        btn1 = QPushButton('시작', self)
+        btn1.clicked.connect(self.button1Function)
+        btn2 = QPushButton('중지', self)
+        btn2.clicked.connect(self.button2Function)
 
-      text2 = QLabel('키워드')
+        text2 = QLabel('키워드')
 
-      global keyword
-      keyword = QListWidget()
+        global keyword
+        keyword = QListWidget()
 
-      # 키워드 온/오프 버튼
-      global k_on, k_off
-      k_on = QRadioButton('ON', self)
-      k_off = QRadioButton('OFF', self)
-      k_off.setChecked(True)
+        # 키워드 온/오프 버튼
+        global k_on, k_off
+        k_on = QRadioButton('ON', self)
+        k_off = QRadioButton('OFF', self)
+        k_off.setChecked(True)
 
-      # 추가할 키워드 적는 칸
-      global newItem
-      newItem = QLineEdit()
+        # 추가할 키워드 적는 칸
+        global newItem
+        newItem = QLineEdit()
 
-      # 키워드 추가/삭제 버튼
-      btn3 = QPushButton('추가', self)
-      btn3.clicked.connect(self.button3Function)
-      btn4 = QPushButton('삭제', self)
-      btn4.clicked.connect(self.button4Function)
+        # 키워드 추가/삭제 버튼
+        btn3 = QPushButton('추가', self)
+        btn3.clicked.connect(self.button3Function)
+        btn4 = QPushButton('삭제', self)
+        btn4.clicked.connect(self.button4Function)
 
-      # 키워드 저장/불러오기 버튼
-      btn5 = QPushButton('저장', self)
-      btn5.clicked.connect(self.button5Function)
-      btn6 = QPushButton('불러오기', self)
-      btn6.clicked.connect(self.button6Function)
+        # 키워드 저장/불러오기 버튼
+        btn5 = QPushButton('저장', self)
+        btn5.clicked.connect(self.button5Function)
+        btn6 = QPushButton('불러오기', self)
+        btn6.clicked.connect(self.button6Function)
 
-      # 위에서 선언한 위젯들의 위치를 지정
-      grid.addWidget(text1, 0, 0)
-      grid.addWidget(togomi, 0, 4)
-      grid.addWidget(self.addr, 1, 0, 1, 5)
-      grid.addWidget(btn1, 2, 0, 1, 4)
-      grid.addWidget(btn2, 2, 4)
-      grid.addWidget(text2, 3, 0)
-      grid.addWidget(k_on, 3, 1)
-      grid.addWidget(k_off, 3, 2)
-      grid.addWidget(newItem, 3, 3)
-      grid.addWidget(keyword, 4, 0, -1, 4)
-      grid.addWidget(btn3, 4, 4)
-      grid.addWidget(btn4, 5, 4)
-      grid.addWidget(btn5, 6, 4)
-      grid.addWidget(btn6, 7, 4)
+        # 위에서 선언한 위젯들의 위치를 지정
+        grid.addWidget(text1, 0, 0)
+        grid.addWidget(togomi, 0, 4)
+        grid.addWidget(self.addr, 1, 0, 1, 5)
+        grid.addWidget(btn1, 2, 0, 1, 4)
+        grid.addWidget(btn2, 2, 4)
+        grid.addWidget(text2, 3, 0)
+        grid.addWidget(k_on, 3, 1)
+        grid.addWidget(k_off, 3, 2)
+        grid.addWidget(newItem, 3, 3)
+        grid.addWidget(keyword, 4, 0, -1, 4)
+        grid.addWidget(btn3, 4, 4)
+        grid.addWidget(btn4, 5, 4)
+        grid.addWidget(btn5, 6, 4)
+        grid.addWidget(btn6, 7, 4)
 
-      self.setWindowTitle('아카라이브 새글 알리미')
-      self.setWindowIcon(QIcon('icon.png'))
-      #self.setFixedSize(380, 200)
-      self.show()
+        self.setWindowTitle('아카라이브 새글 알리미')
+        self.setWindowIcon(QIcon('icon.png'))
+        #self.setFixedSize(380, 200)
+        self.show()
 
-  def center(self):
-      qr = self.frameGeometry()
-      cp = QDesktopWidget().availableGeometry().center()
-      qr.moveCenter(cp)
-      self.move(qr.topLeft())
+    def center(self):
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
-  # 시작 버튼
-  def button1Function(self):
-      global flag
-      flag = True
+    # 시작 버튼
+    def button1Function(self):
+        global flag
+        flag = True
 
-      html = get_html(self.addr.text())
-      soup = BeautifulSoup(html, 'html.parser')
+        html = get_html(self.addr.text())
+        soup = BeautifulSoup(html, 'html.parser')
 
-      # 받아온 html에서 글 번호만 파싱
-      l = soup.find("body").find_all("span", class_="vcol col-id")
+        # 받아온 html에서 글 번호만 파싱
+        l = soup.find("body").find_all("span", class_="vcol col-id")
 
-      # recent 변수에 현재 최신 글 번호를 저장
-      global recent
-      recent = 1
+        # recent 변수에 현재 최신 글 번호를 저장
+        global recent
+        recent = 1
 
-      for idx in l:
-          num = idx.text.strip()
-          if (not num.isdecimal()):
-              continue
-          if (recent < int(num)):
-              recent = int(num)
+        for idx in l:
+            num = idx.text.strip()
+            if (not num.isdecimal()):
+                continue
+            if (recent < int(num)):
+                recent = int(num)
 
-      QMessageBox.about(self, "실행", "알림이 시작 되었습니다.\n이 창을 닫으셔도 좋습니다.")
+        QMessageBox.about(self, "실행", "알림이 시작 되었습니다.\n이 창을 닫으셔도 좋습니다.")
 
-      # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
-      def run():
-          global recent
-          global link
-          skip = False
-          # 중지버튼으로 flag가 false가 되기 전까지 계속 수행
-          while flag == True:
-              # 3초 간격으로 get_html() 호출
-              if not skip :
-                  time.sleep(3)
-              else:
-                  skip = False
+        # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
+        def run():
+            global recent
+            global link
+            skip = False
+            # 중지버튼으로 flag가 false가 되기 전까지 계속 수행
+            while flag == True:
+                # 3초 간격으로 get_html() 호출
+                if not skip :
+                    time.sleep(3)
+                else:
+                    skip = False
 
-              html = get_html(self.addr.text())
-              sp = BeautifulSoup(html, 'html.parser')
-              new_post = sp.find("body")
+                html = get_html(self.addr.text())
+                sp = BeautifulSoup(html, 'html.parser')
+                new_post = sp.find("body")
 
-              new_title = new_post.find_all("span", class_="vcol col-title")
-              new_name = new_post.find_all("span", class_="vcol col-author")
-              new_num = new_post.find_all("span", class_="vcol col-id")
-              new_link = new_post.find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow']) # 정확히 vrow라는 이름의 class만 가져오기 위해
+                new_title = new_post.find_all("span", class_="vcol col-title")
+                new_name = new_post.find_all("span", class_="vcol col-author")
+                new_num = new_post.find_all("span", class_="vcol col-id")
+                new_link = new_post.find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow']) # 정확히 vrow라는 이름의 class만 가져오기 위해
 
-              # 새로 가져온 리스트의 글 번호들을 비교
-              n_idx = 0
-              size = len(new_num)
-              link_size = len(new_link)
-              for n in reversed(new_num):
-                  if flag == False:
-                      break
-                  if (not n.text.strip().isdecimal()):
-                      n_idx = n_idx + 1
-                      continue
-                  # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
-                  if (int(n.text.strip()) > recent):
-                      recent = int(n.text.strip())
-                      name = new_name[size-n_idx-1].text.strip()
-                      title = new_title[size-n_idx-1].text.strip()
-                      link = new_link[link_size-n_idx-1].attrs['href']
-                      # 키워드=off 일 경우, 바로 토스트 메시지로 표시
-                      if k_off.isChecked():
-                          toaster.show_toast(title, name, icon_path="arca_image.ico", duration=3, callback_on_click=action)
-                          skip = True
-                      # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
-                      if k_on.isChecked():
-                          for key in range(keyword.count()):
-                              if keyword.item(key).text() in title:
-                                  toaster.show_toast(title, name, icon_path="arca_image.ico", duration=3, callback_on_click=action)
-                                  skip = True
-                                  break
-                  n_idx = n_idx + 1
-              if flag == False:
-                  break
+                # 새로 가져온 리스트의 글 번호들을 비교
+                n_idx = 0
+                size = len(new_num)
+                link_size = len(new_link)
+                for n in reversed(new_num):
+                    if flag == False:
+                        break
+                    if (not n.text.strip().isdecimal()):
+                        n_idx = n_idx + 1
+                        continue
+                    # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
+                    if (int(n.text.strip()) > recent):
+                        recent = int(n.text.strip())
+                        name = new_name[size-n_idx-1].text.strip()
+                        title = new_title[size-n_idx-1].text.strip()
+                        link = new_link[link_size-n_idx-1].attrs['href']
+                        # 키워드=off 일 경우, 바로 토스트 메시지로 표시
+                        if k_off.isChecked():
+                            toaster.show_toast(title, name, icon_path="arca_image.ico", duration=3, callback_on_click=action)
+                            skip = True
+                        # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
+                        if k_on.isChecked():
+                            for key in range(keyword.count()):
+                                if keyword.item(key).text() in title:
+                                    toaster.show_toast(title, name, icon_path="arca_image.ico", duration=3, callback_on_click=action)
+                                    skip = True
+                                    break
+                    n_idx = n_idx + 1
+                if flag == False:
+                    break
 
-      thread = threading.Thread(target=run)
-      thread.start()
+        thread = threading.Thread(target=run)
+        thread.start()
 
-      # 클릭 시, 웹 브라우저로 연결해주는 함수
-      def action():
-          full_link = "https://arca.live" + link
-          webbrowser.open_new(full_link)
+        # 클릭 시, 웹 브라우저로 연결해주는 함수
+        def action():
+            full_link = "https://arca.live" + link
+            webbrowser.open_new(full_link)
 
-  # 중지 버튼
-  def button2Function(self):
-      global flag
-      flag = False
-      QMessageBox.about(self, "중지", "알림이 중지 되었습니다.")
+    # 중지 버튼
+    def button2Function(self):
+        global flag
+        flag = False
+        QMessageBox.about(self, "중지", "알림이 중지 되었습니다.")
 
-  # 키워드 추가 버튼
-  def button3Function(self):
-      if newItem.text() != '':
-          keyword.addItem(newItem.text())
+    # 키워드 추가 버튼
+    def button3Function(self):
+        if newItem.text() != '':
+            keyword.addItem(newItem.text())
 
-  # 키워드 삭제 버튼
-  def button4Function(self):
-      select = keyword.currentRow()
-      keyword.takeItem(select)
+    # 키워드 삭제 버튼
+    def button4Function(self):
+        select = keyword.currentRow()
+        keyword.takeItem(select)
 
-  # 키워드 저장 버튼
-  def button5Function(self):
-      root = tkinter.Tk()
-      root.withdraw()
-      file_path = filedialog.asksaveasfile(parent=root, title="키워드 저장", filetypes=(("text files", "*.txt"),("all files", "*.txt")), defaultextension="txt")
-      if file_path is None:
-          # 저장이 안 됐을 시, 예외 처리
-          return
-      else:
-          # 키워드를 파일로 저장
-          file_path.write("[채널 주소]\n")
-          file_path.write(self.addr.text() + "\n")
-          file_path.write("[키워드]\n")
-          for key in range(keyword.count()):
-              file_path.write(keyword.item(key).text() + "\n")
+    # 키워드 저장 버튼
+    def button5Function(self):
+        root = tkinter.Tk()
+        root.withdraw()
+        file_path = filedialog.asksaveasfile(parent=root, title="키워드 저장", filetypes=(("text files", "*.txt"),("all files", "*.txt")), defaultextension="txt")
+        if file_path is None:
+            # 저장이 안 됐을 시, 예외 처리
+            return
+        else:
+            # 키워드를 파일로 저장
+            file_path.write("[채널 주소]\n")
+            file_path.write(self.addr.text() + "\n")
+            file_path.write("[키워드]\n")
+            for key in range(keyword.count()):
+                file_path.write(keyword.item(key).text() + "\n")
 
-  # 키워드 불러오기 버튼
-  def button6Function(self):
-      root = tkinter.Tk()
-      root.withdraw()
-      file_path = filedialog.askopenfilename(parent=root, title="키워드 불러오기", filetypes=(("text files", "*.txt"),("all files", "*.txt")), defaultextension="txt")
-      if file_path == "":
-          # 아무것도 안 불러왔을 시, 예외 처리
-          return
-      else:
-          data = open(file_path, 'r')
-          isURL = data.readline().rstrip('\n')
-          # 채널 주소 불러오기
-          if isURL != "[채널 주소]":
-              # 첫 줄이 [채널 주소]가 아니라면, 잘못된 파일을 읽은 것으로 판단
-              return
-          else:
-              self.addr.setText(data.readline().rstrip('\n'))
+    # 키워드 불러오기 버튼
+    def button6Function(self):
+        root = tkinter.Tk()
+        root.withdraw()
+        file_path = filedialog.askopenfilename(parent=root, title="키워드 불러오기", filetypes=(("text files", "*.txt"),("all files", "*.txt")), defaultextension="txt")
+        if file_path == "":
+            # 아무것도 안 불러왔을 시, 예외 처리
+            return
+        else:
+            data = open(file_path, 'r')
+            isURL = data.readline().rstrip('\n')
+            # 채널 주소 불러오기
+            if isURL != "[채널 주소]":
+                # 첫 줄이 [채널 주소]가 아니라면, 잘못된 파일을 읽은 것으로 판단
+                return
+            else:
+                self.addr.setText(data.readline().rstrip('\n'))
 
-          # 키워드 불러오기
-          isKeyword = data.readline().rstrip('\n')
-          if isKeyword != "[키워드]":
-              # [키워드]가 아니라면, 잘못된 파일을 읽은 것으로 판단
-              return
-          else:
-              lines = data.readlines()
-              keyword.clear() # 불러오기 전, 이전에 있던 키워드 삭제
-              for line in lines:
-                  keyword.addItem(line.rstrip('\n'))
+            # 키워드 불러오기
+            isKeyword = data.readline().rstrip('\n')
+            if isKeyword != "[키워드]":
+                # [키워드]가 아니라면, 잘못된 파일을 읽은 것으로 판단
+                return
+            else:
+                lines = data.readlines()
+                keyword.clear() # 불러오기 전, 이전에 있던 키워드 삭제
+                for line in lines:
+                    keyword.addItem(line.rstrip('\n'))
 
-          data.close()
+            data.close()
 
 if __name__ == '__main__':
-  app = QApplication(sys.argv)
-  ex = MyApp()
-  sys.exit(app.exec_())
+    app = QApplication(sys.argv)
+    ex = MyApp()
+    sys.exit(app.exec_())
