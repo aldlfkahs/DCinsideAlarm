@@ -160,24 +160,34 @@ class MyApp(QWidget):
         global url
 
         flag = True
-        self._lock.acquire()
+        addr_text = self.addr.text()
 
-        url = self.addr.text()
-        html = get_html(url)
-        soup = BeautifulSoup(html, 'html.parser')
-
-        # 채널 주소 파싱
-        channel_id = soup.select_one('body>div>div.content-wrapper.clearfix>article>div>div.board-title>a:nth-child(3)').attrs['href'].replace('/b/', '')
+        # 채널 주소에서 채널 ID를 파싱하는 정규표현식 매칭
+        m_channel_id = re.match(r"http[s]?://arca[.]live/b/(?P<channel_id>[a-z\d]+)(/?$|[?].*)", addr_text)
+        if not m_channel_id:
+            # 매칭이 되지 않으면 오류 메시지 출력 및 예외 처리
+            QMessageBox.about(self, "오류", "채널 주소가 잘못되었습니다.")
+            return
+        # 체널 주소에서 채널 ID만 추출
+        channel_id = m_channel_id.group('channel_id')
         # 게시글 주소에서 글 번호만 추출하는 정규표현식 정의
         p_post_id = re.compile(channel_id + r"/(?P<post_id>[\d]+)\??")
 
-        # 받아온 html에서 게시글 주소만 파싱
-        l = soup.find("div", class_="list-table").find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
+        html = get_html(addr_text)
+        soup = BeautifulSoup(html, 'html.parser')
 
+        # 받아온 html에서 게시글 주소만 파싱
+        try:
+            l = soup.find("div", class_="list-table").find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
+        except Exception:
+            QMessageBox.about(self, "오류", "채널 주소가 잘못되었습니다.")
+            return
+
+        self._lock.acquire()
         # recent 변수에 현재 최신 글 번호를 저장
         recent = 0
-        for i in range(len(l)):
-            link = l[i].attrs['href']
+        for n in l:
+            link = n.attrs['href']
             # 게시글 주소에서 정규표현식 매칭
             s_post_id = p_post_id.search(link)
             if s_post_id:
@@ -185,6 +195,7 @@ class MyApp(QWidget):
                 recent = int(s_post_id.group('post_id'))
                 break
 
+        url = addr_text
         self._lock.release()
         QMessageBox.about(self, "실행", "알림이 시작 되었습니다.\n이 창을 닫으셔도 좋습니다.")
 
