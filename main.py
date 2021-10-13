@@ -90,7 +90,7 @@ class MyApp(QWidget):
         self.addr.setText("https://arca.live/b/singbung")
 
         text1 = QLabel('채널 주소')
-        togomi = QLabel('버전 : 1.4.6')
+        togomi = QLabel('버전 : 1.5.0')
 
         # 시작/중지 버튼
         btn1 = QPushButton('시작', self)
@@ -160,10 +160,10 @@ class MyApp(QWidget):
         global url
 
         flag = True
-        addr_text = self.addr.text()
+        addr_text = self.addr.text().lower()
 
         # 채널 주소에서 채널 ID를 파싱하는 정규표현식 매칭
-        m_channel_id = re.match(r"http[s]?://arca[.]live/b/(?P<channel_id>[a-z\d]+)(/?$|[?].*)", addr_text)
+        m_channel_id = re.match(r"^http[s]?://arca[.]live/b/(?P<channel_id>[a-z\d]+)/?($|[?].*)", addr_text)
         if not m_channel_id:
             # 매칭이 되지 않으면 오류 메시지 출력 및 예외 처리
             QMessageBox.about(self, "오류", "채널 주소가 잘못되었습니다.")
@@ -171,7 +171,7 @@ class MyApp(QWidget):
         # 체널 주소에서 채널 ID만 추출
         channel_id = m_channel_id.group('channel_id')
         # 게시글 주소에서 글 번호만 추출하는 정규표현식 정의
-        p_post_id = re.compile(channel_id + r"/(?P<post_id>[\d]+)\??")
+        p_post_id = re.compile(channel_id + r"/(?P<post_id>[\d]+)[?]?")
 
         html = get_html(addr_text)
         soup = BeautifulSoup(html, 'html.parser')
@@ -179,7 +179,7 @@ class MyApp(QWidget):
         # 받아온 html에서 게시글 주소만 파싱
         try:
             l = soup.find("div", class_="list-table").find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
-        except Exception:
+        except AttributeError:
             QMessageBox.about(self, "오류", "채널 주소가 잘못되었습니다.")
             return
 
@@ -219,8 +219,6 @@ class MyApp(QWidget):
                 soup = BeautifulSoup(html, 'html.parser')
                 new_post = soup.find("div", class_="list-table")
 
-                new_header = new_post.find_all("span", class_="badge badge-success")    # 글머리
-                new_num_c = new_post.find_all("span", class_="info")                    # 댓글 수
                 new_title = new_post.find_all("span", class_="vcol col-title")          # 제목
                 new_author = new_post.find_all("span", class_="vcol col-author")        # 작성자
                 # 게시글 주소 (정확히 vrow라는 이름의 class만 가져오기 위해 lambda로 구현)
@@ -239,22 +237,32 @@ class MyApp(QWidget):
                     post_id = int(s_post_id.group('post_id'))
                     # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
                     if (post_id > recent):
-                        header = new_header[-i-1].text.strip()
-                        num_c = new_num_c[-i-1].text.strip()
-                        title = new_title[-i-1].text.replace(num_c, '').strip()
-                        if header != '':
-                            title = title.replace(header, f'[{header}]')
+                        title = new_title[-i-1].text.strip()
                         author = new_author[-i-1].text.strip()
+
+                        header = n.find_all("span", class_="badge badge-success")       # 글머리
+                        header = [hd.text.strip() for hd in header]
+                        try:
+                            num_c = n.find("span", class_="info").text.strip()          # 댓글 수
+                        except AttributeError:
+                            num_c = ''
+
+                        clear_title = title.replace(num_c, '').strip()
+                        for hd in header:
+                            clear_title = clear_title.replace(hd, '').strip()
+
+                        header_f = ' '.join([f'[{hd}]' for hd in header if hd != ''])
+                        title_f = f'{header_f}\n{clear_title}'
                         # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                         if k_off.isChecked():
-                            toaster.show_toast(title, author, icon_path=resource_path("arca_image.ico"), duration=None, callback_on_click=get_action(link))
+                            toaster.show_toast(title_f, author, icon_path=resource_path("arca_image.ico"), duration=None, callback_on_click=get_action(link))
                             recent = post_id
                             skip = True
                         # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
                         if k_on.isChecked():
                             for key in range(keyword.count()):
                                 if keyword.item(key).text() in title:
-                                    toaster.show_toast(title, author, icon_path=resource_path("arca_image.ico"), duration=None, callback_on_click=get_action(link))
+                                    toaster.show_toast(title_f, author, icon_path=resource_path("arca_image.ico"), duration=None, callback_on_click=get_action(link))
                                     recent = post_id
                                     skip = True
                                     break
