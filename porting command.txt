@@ -6,7 +6,7 @@ conda env create -f environment_py38_32.yml -p .\py38_32
 # 가상환경 활성화
 conda activate .\py38_32
 # 32비트 버전 exe파일 포팅
-pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="아카라이브 새글알리미 32bit.exe" ..\main.py
+pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="아카라이브 새글 알리미 32bit.exe" ..\main.py
 # 가상환경 비활성화
 conda deactivate
 
@@ -18,6 +18,6 @@ conda env create -f environment_py38_64.yml -p .\py38_64
 # 가상환경 활성화
 conda activate .\py38_64
 # 64비트 버전 exe파일 포팅
-pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="아카라이브 새글알리미 64bit.exe" ..\main.py
+pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="아카라이브 새글 알리미 64bit.exe" ..\main.py
 # 가상환경 비활성화
 conda deactivate
