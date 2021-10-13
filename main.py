@@ -219,8 +219,6 @@ class MyApp(QWidget):
                 soup = BeautifulSoup(html, 'html.parser')
                 new_post = soup.find("div", class_="list-table")
 
-                new_title = new_post.find_all("span", class_="vcol col-title")          # 제목
-                new_author = new_post.find_all("span", class_="vcol col-author")        # 작성자
                 # 게시글 주소 (정확히 vrow라는 이름의 class만 가져오기 위해 lambda로 구현)
                 new_link = new_post.find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
 
@@ -237,13 +235,19 @@ class MyApp(QWidget):
                     post_id = int(s_post_id.group('post_id'))
                     # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
                     if (post_id > recent):
-                        title = new_title[-i-1].text.strip()
-                        author = new_author[-i-1].text.strip()
+                        try:
+                            title = n.find("span", class_="vcol col-title").text.strip()    # 제목
+                        except AttributeError:
+                            title = 'Unknown'
+                        try:
+                            author = n.find("span", class_="vcol col-author").text.strip()  # 작성자
+                        except AttributeError:
+                            author = 'Unknown'
 
-                        header = n.find_all("span", class_="badge badge-success")       # 글머리
+                        header = n.find_all("span", class_="badge badge-success")           # 글머리
                         header = [hd.text.strip() for hd in header]
                         try:
-                            num_c = n.find("span", class_="info").text.strip()          # 댓글 수
+                            num_c = n.find("span", class_="info").text.strip()              # 댓글 수
                         except AttributeError:
                             num_c = ''
 
@@ -252,7 +256,7 @@ class MyApp(QWidget):
                             clear_title = clear_title.replace(hd, '').strip()
 
                         header_f = ' '.join([f'[{hd}]' for hd in header if hd != ''])
-                        title_f = f'{header_f}\n{clear_title}'
+                        title_f = f'{header_f}\n{clear_title}'.strip()
                         # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                         if k_off.isChecked():
                             toaster.show_toast(title_f, author, icon_path=resource_path("arca_image.ico"), duration=None, callback_on_click=get_action(link))
