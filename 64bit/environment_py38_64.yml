@@ -1,0 +1,36 @@
+channels:
+  - defaults/win-64
+dependencies:
+  - ca-certificates=2021.9.30
+  - certifi=2021.5.30
+  - openssl=1.1.1l
+  - pip=21.0.1
+  - python=3.8.8
+  - pywin32=227
+  - setuptools=58.0.4
+  - sqlite=3.36.0
+  - vc=14.2
+  - vs2015_runtime=14.27.29016
+  - wheel=0.37.0
+  - wincertstore=0.2
+  - pip:
+    - altgraph==0.17.2
+    - beautifulsoup4==4.10.0
+    - charset-normalizer==2.0.6
+    - future==0.18.2
+    - idna==3.2
+    - pefile==2021.9.3
+    - pyinstaller==4.5.1
+    - pyinstaller-hooks-contrib==2021.3
+    - pypiwin32==223
+    - pyqt5==5.15.4
+    - pyqt5-qt5==5.15.2
+    - pyqt5-sip==12.9.0
+    - pywin32-ctypes==0.2.0
+    - requests==2.26.0
+    - soupsieve==2.2.1
+    - tk==0.1.0
+    - urllib3==1.26.7
+    - win10toast-click==0.1.2
+variables:
+  CONDA_SUBDIR: win-64
