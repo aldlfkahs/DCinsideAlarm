@@ -34,7 +34,7 @@ import time
 import threading
 import webbrowser
 from bs4 import BeautifulSoup
-from win10toast import ToastNotifier
+from win10toast_click import ToastNotifier
 import tkinter
 from tkinter import filedialog
 
@@ -67,6 +67,8 @@ class MyApp(QWidget):
   def __init__(self):
       super().__init__()
       self.initUI()
+      self._thread = None
+      self._lock = threading.Lock()
 
   # UI 설정
   def initUI(self):
@@ -77,7 +79,7 @@ class MyApp(QWidget):
       self.addr.setText("https://gall.dcinside.com/mgallery/board/lists?id=aoegame")
 
       text1 = QLabel('갤러리 주소')
-      togomi = QLabel('버전 : 1.4.1')
+      togomi = QLabel('버전 : 1.5.0')
 
       # 시작/중지 버튼
       btn1 = QPushButton('시작', self)
@@ -148,10 +150,15 @@ class MyApp(QWidget):
       soup = BeautifulSoup(html, 'html.parser')
 
       # 받아온 html에서 글 번호만 파싱
-      l = soup.find("tbody").find_all("td", class_="gall_num")
+      try:
+          l = soup.find("tbody").find_all("td", class_="gall_num")
+      except AttributeError:
+          QMessageBox.about(self, "오류", "갤러리 주소가 잘못되었습니다.")
+          return
 
       # recent 변수에 현재 최신 글 번호를 저장
       global recent
+      self._lock.acquire()
       recent = 1
 
       for idx in l:
@@ -159,6 +166,8 @@ class MyApp(QWidget):
               continue
           if (recent < int(idx.text)):
               recent = int(idx.text)
+
+      self._lock.release()
 
       QMessageBox.about(self, "실행", "알림이 시작 되었습니다.\n이 창을 닫으셔도 좋습니다.")
 
@@ -213,8 +222,10 @@ class MyApp(QWidget):
               if flag == False:
                   break
 
-      thread = threading.Thread(target=run)
-      thread.start()
+      # 스레드가 없거나 종료되어 있을 때만 새로운 스레드 생성 및 실행
+      if self._thread == None or not self._thread.is_alive():
+          self._thread = threading.Thread(target=run, daemon=True)
+          self._thread.start()
 
       # 클릭 시, 웹 브라우저로 연결해주는 함수
       def action():
@@ -241,28 +252,30 @@ class MyApp(QWidget):
   def button5Function(self):
       root = tkinter.Tk()
       root.withdraw()
-      file_path = filedialog.asksaveasfile(parent=root, title="키워드 저장", filetypes=(("text files", "*.txt"),("all files", "*.txt")), defaultextension="txt")
-      if file_path is None:
+      file_path = filedialog.asksaveasfilename(parent=root, title="키워드 저장", filetypes=(("text files", "*.txt"),("all files", "*.*")), defaultextension="txt")
+      if file_path == "":
           # 저장이 안 됐을 시, 예외 처리
           return
       else:
           # 키워드를 파일로 저장
-          file_path.write("[갤러리 주소]\n")
-          file_path.write(self.addr.text() + "\n")
-          file_path.write("[키워드]\n")
+          f = open(file_path, 'w', encoding='utf-8')
+          f.write("[갤러리 주소]\n")
+          f.write(self.addr.text() + "\n")
+          f.write("[키워드]\n")
           for key in range(keyword.count()):
-              file_path.write(keyword.item(key).text() + "\n")
+              f.write(keyword.item(key).text() + "\n")
+          f.close()
 
   # 키워드 불러오기 버튼
   def button6Function(self):
       root = tkinter.Tk()
       root.withdraw()
-      file_path = filedialog.askopenfilename(parent=root, title="키워드 불러오기", filetypes=(("text files", "*.txt"),("all files", "*.txt")), defaultextension="txt")
+      file_path = filedialog.askopenfilename(parent=root, title="키워드 불러오기", filetypes=(("text files", "*.txt"),("all files", "*.*")), defaultextension="txt")
       if file_path == "":
           # 아무것도 안 불러왔을 시, 예외 처리
           return
       else:
-          data = open(file_path, 'r')
+          data = open(file_path, 'r', encoding='utf-8')
           isURL = data.readline().rstrip('\n')
           # 갤러리 주소 불러오기
           if isURL != "[갤러리 주소]":
