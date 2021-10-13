@@ -7,7 +7,7 @@
 새 글 알림을 받고 싶은 갤러리의 메인 페이지 주소를 적은 뒤, 시작 버튼을 누르면 됩니다.  
 __반드시 사용 전 설정사항과 주의사항을 읽으신 뒤에 사용해주세요!__  
 
-[__다운로드__](https://drive.google.com/file/d/1X0-OBHHe3yGTKRxjnuIiJiA2k4MTPA6q/view?usp=sharing)해주세요.  
+[__다운로드__](https://drive.google.com/file/d/1X0-OBHHe3yGTKRxjnuIiJiA2k4MTPA6q/view?usp=sharing) 
 (비밀번호 : 11037)  
 
 ### 사용법
