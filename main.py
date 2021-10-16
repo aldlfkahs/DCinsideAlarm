@@ -22,6 +22,7 @@
       https://wikidocs.net/26
       https://stackoverflow.com/questions/22726860/beautifulsoup-webscraping-find-all-finding-exact-match
       https://pypi.org/project/win10toast-click/
+      https://malja.github.io/zroya/index.html
 '''
 '''
 사용 전 필수 설정사항
@@ -38,12 +39,19 @@ import time
 import threading
 import webbrowser
 from bs4 import BeautifulSoup
-from win10toast_click import ToastNotifier
+import zroya
 import tkinter
 from tkinter import filedialog
 import re
 
-toaster = ToastNotifier()
+version = '1.5.1'
+status = zroya.init(
+    app_name="ArcaAlarm",
+    company_name="python",
+    product_name="python",
+    sub_product="python",
+    version=f"v{version}"
+)
 user_agent = {'User-agent': 'Mozilla/5.0'}
 flag = True
 
@@ -73,6 +81,22 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
+def show_notify(title, body, post_link):
+    template = zroya.Template(zroya.TemplateType.ImageAndText3)
+    if os.path.exists(resource_path("arca_image.ico")):
+        template.setImage(resource_path("arca_image.ico"))
+    template.setFirstLine(title)
+    template.setSecondLine(body)
+    open_action_id = template.addAction("Open in Browser")
+    def onClickHandler(notification_id):
+        full_link = "https://arca.live" + post_link
+        webbrowser.open_new(full_link)
+    def onActionHandler(notification_id, action_id):
+        if action_id == open_action_id:
+            full_link = "https://arca.live" + post_link
+            webbrowser.open_new(full_link)
+    zroya.show(template, on_click=onClickHandler, on_action=onActionHandler)
+
 class MyApp(QWidget):
 
     def __init__(self):
@@ -90,7 +114,7 @@ class MyApp(QWidget):
         self.addr.setText("https://arca.live/b/singbung")
 
         text1 = QLabel('채널 주소')
-        togomi = QLabel('버전 : 1.5.0')
+        togomi = QLabel(f'버전 : {version}')
 
         # 시작/중지 버튼
         btn1 = QPushButton('시작', self)
@@ -154,7 +178,6 @@ class MyApp(QWidget):
 
     # 시작 버튼
     def button1Function(self):
-        global toaster
         global recent
         global flag
         global url
@@ -201,7 +224,6 @@ class MyApp(QWidget):
 
         # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
         def run():
-            global toaster
             global recent
             global flag
             global url
@@ -223,7 +245,7 @@ class MyApp(QWidget):
                 new_link = new_post.find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
 
                 # 새로 가져온 리스트의 글 번호들을 비교
-                for i, n in enumerate(reversed(new_link)):
+                for n in reversed(new_link):
                     if flag == False:
                         break
                     link = n.attrs['href']
@@ -236,7 +258,7 @@ class MyApp(QWidget):
                     # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
                     if (post_id > recent):
                         try:
-                            title = n.find("span", class_="vcol col-title").text.strip()    # 제목
+                            title = n.find("span", class_="title").text.strip()             # 제목
                         except AttributeError:
                             title = 'Unknown'
                         try:
@@ -246,27 +268,19 @@ class MyApp(QWidget):
 
                         header = n.find_all("span", class_="badge badge-success")           # 글머리
                         header = [hd.text.strip() for hd in header]
-                        try:
-                            num_c = n.find("span", class_="info").text.strip()              # 댓글 수
-                        except AttributeError:
-                            num_c = ''
-
-                        clear_title = title.replace(num_c, '').strip()
-                        for hd in header:
-                            clear_title = clear_title.replace(hd, '').strip()
 
                         header_f = ' '.join([f'[{hd}]' for hd in header if hd != ''])
-                        title_f = f'{header_f}\n{clear_title}'.strip()
+                        title_f = f'{header_f}\n{title}'.strip()
                         # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                         if k_off.isChecked():
-                            toaster.show_toast(title_f, author, icon_path=resource_path("arca_image.ico"), duration=None, callback_on_click=get_action(link))
+                            show_notify(title_f, author, link)
                             recent = post_id
                             skip = True
                         # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
                         if k_on.isChecked():
                             for key in range(keyword.count()):
-                                if keyword.item(key).text() in title:
-                                    toaster.show_toast(title_f, author, icon_path=resource_path("arca_image.ico"), duration=None, callback_on_click=get_action(link))
+                                if keyword.item(key).text() in title_f:
+                                    show_notify(title_f, author, link)
                                     recent = post_id
                                     skip = True
                                     break
@@ -278,14 +292,6 @@ class MyApp(QWidget):
         if self._thread == None or not self._thread.is_alive():
             self._thread = threading.Thread(target=run, daemon=True)
             self._thread.start()
-
-        # 게시글 주소를 담고 있을 클로저 함수
-        def get_action(post_link):
-            # 클릭 시, 웹 브라우저로 연결해주는 함수
-            def action():
-                full_link = "https://arca.live" + post_link
-                webbrowser.open_new(full_link)
-            return action
 
     # 중지 버튼
     def button2Function(self):
