@@ -227,14 +227,10 @@ class MyApp(QWidget):
             global recent
             global flag
             global url
-            skip = False
             # 중지버튼으로 flag가 false가 되기 전까지 계속 수행
             while flag == True:
                 # 1초 간격으로 get_html() 호출
-                if not skip :
-                    time.sleep(1)
-                else:
-                    skip = False
+                time.sleep(1)
                 self._lock.acquire()
 
                 html = get_html(url)
@@ -275,14 +271,12 @@ class MyApp(QWidget):
                         if k_off.isChecked():
                             show_notify(title_f, author, link)
                             recent = post_id
-                            skip = True
                         # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
                         if k_on.isChecked():
                             for key in range(keyword.count()):
                                 if keyword.item(key).text() in title_f:
                                     show_notify(title_f, author, link)
                                     recent = post_id
-                                    skip = True
                                     break
                 self._lock.release()
                 if flag == False:
