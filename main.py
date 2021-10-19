@@ -46,14 +46,13 @@ import re
 
 version = '1.5.1'
 status = zroya.init(
-    app_name="ArcaAlarm",
+    app_name="ArcaliveAlarm",
     company_name="python",
     product_name="python",
     sub_product="python",
     version=f"v{version}"
 )
 user_agent = {'User-agent': 'Mozilla/5.0'}
-flag = True
 
 # url로 get 요청을 보내는 함수
 def get_html(url):
@@ -81,21 +80,15 @@ def resource_path(relative_path):
         base_path = os.path.abspath(".")
     return os.path.join(base_path, relative_path)
 
-def show_notify(title, body, post_link):
+def show_notify(title, body, link):
     template = zroya.Template(zroya.TemplateType.ImageAndText3)
     if os.path.exists(resource_path("arca_image.ico")):
         template.setImage(resource_path("arca_image.ico"))
     template.setFirstLine(title)
     template.setSecondLine(body)
-    open_action_id = template.addAction("Open in Browser")
     def onClickHandler(notification_id):
-        full_link = "https://arca.live" + post_link
-        webbrowser.open_new(full_link)
-    def onActionHandler(notification_id, action_id):
-        if action_id == open_action_id:
-            full_link = "https://arca.live" + post_link
-            webbrowser.open_new(full_link)
-    zroya.show(template, on_click=onClickHandler, on_action=onActionHandler)
+        webbrowser.open_new(link)
+    zroya.show(template, on_click=onClickHandler)
 
 class MyApp(QWidget):
 
@@ -178,6 +171,7 @@ class MyApp(QWidget):
 
     # 시작 버튼
     def button1Function(self):
+        global channel_id
         global recent
         global flag
         global url
@@ -191,10 +185,6 @@ class MyApp(QWidget):
             # 매칭이 되지 않으면 오류 메시지 출력 및 예외 처리
             QMessageBox.about(self, "오류", "채널 주소가 잘못되었습니다.")
             return
-        # 체널 주소에서 채널 ID만 추출
-        channel_id = m_channel_id.group('channel_id')
-        # 게시글 주소에서 글 번호만 추출하는 정규표현식 정의
-        p_post_id = re.compile(channel_id + r"/(?P<post_id>[\d]+)[?]?")
 
         html = get_html(addr_text)
         soup = BeautifulSoup(html, 'html.parser')
@@ -207,12 +197,17 @@ class MyApp(QWidget):
             return
 
         self._lock.acquire()
+        # 체널 주소에서 채널 ID만 추출
+        channel_id = m_channel_id.group('channel_id')
+        # 게시글 주소에서 글 번호만 추출하는 정규표현식 정의
+        p_post_id = re.compile(channel_id + r"/(?P<post_id>[\d]+)[?]?")
+
         # recent 변수에 현재 최신 글 번호를 저장
         recent = 0
         for n in l:
-            link = n.attrs['href']
+            post_link = n.attrs['href']
             # 게시글 주소에서 정규표현식 매칭
-            s_post_id = p_post_id.search(link)
+            s_post_id = p_post_id.search(post_link)
             if s_post_id:
                 # 매칭이 되면 글 번호만 추출
                 recent = int(s_post_id.group('post_id'))
@@ -224,6 +219,7 @@ class MyApp(QWidget):
 
         # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
         def run():
+            global channel_id
             global recent
             global flag
             global url
@@ -244,9 +240,9 @@ class MyApp(QWidget):
                 for n in reversed(new_link):
                     if flag == False:
                         break
-                    link = n.attrs['href']
+                    post_link = n.attrs['href']
                     # 게시글 주소에서 정규표현식 매칭
-                    s_post_id = p_post_id.search(link)
+                    s_post_id = p_post_id.search(post_link)
                     if not s_post_id:
                         continue
                     # 매칭이 되면 글 번호만 추출하여 정수형으로 저장
@@ -266,16 +262,18 @@ class MyApp(QWidget):
                         header = [hd.text.strip() for hd in header]
 
                         header_f = ' '.join([f'[{hd}]' for hd in header if hd != ''])
-                        title_f = f'{header_f}\n{title}'.strip()
+                        title_f = f'{header_f} {title}'.strip()
+
+                        full_link = f'https://arca.live/b/{channel_id}/{post_id}'
                         # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                         if k_off.isChecked():
-                            show_notify(title_f, author, link)
+                            show_notify(title_f, author, full_link)
                             recent = post_id
                         # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
                         if k_on.isChecked():
                             for key in range(keyword.count()):
                                 if keyword.item(key).text() in title_f:
-                                    show_notify(title_f, author, link)
+                                    show_notify(title_f, author, full_link)
                                     recent = post_id
                                     break
                 self._lock.release()
