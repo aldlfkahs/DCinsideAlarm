@@ -1,35 +1,35 @@
-# 32ºñÆ® ÇÃ·§ÆûÀ¸·Î º¯°æ
+ï»¿# 32ë¹„íŠ¸ í”Œëž«í¼ìœ¼ë¡œ ë³€ê²½
 conda config --env --set subdir win-32
-# È¯°æ ¼³Ä¡ ¹× ÆÄÀÌ½ã, pip, pywin32 ¼³Ä¡
-conda create -p py38 python=3.8.8 pip=21.0.1 pywin32=227
-# ¼³Ä¡µÈ °¡»óÈ¯°æ ¸ñ·Ï È®ÀÎ
+# í™˜ê²½ ì„¤ì¹˜ ë° íŒŒì´ì¬, pip ì„¤ì¹˜
+conda create -n py38 python=3.8.8 pip=21.0.1
+# ì„¤ì¹˜ëœ ê°€ìƒí™˜ê²½ ëª©ë¡ í™•ì¸
 conda env list
-# °¡»óÈ¯°æ È°¼ºÈ­
+# ê°€ìƒí™˜ê²½ í™œì„±í™”
 conda activate py38
-# °¡»óÈ¯°æ ÇÃ·§ÆûÀ» 32ºñÆ®·Î °íÁ¤
+# ê°€ìƒí™˜ê²½ í”Œëž«í¼ì„ 32ë¹„íŠ¸ë¡œ ê³ ì •
 set CONDA_SUBDIR=win-32
-# °¡»óÈ¯°æ ÇÃ·§ÆûÀÌ 32ºñÆ®°¡ ¸Â´ÂÁö È®ÀÎ
+# ê°€ìƒí™˜ê²½ í”Œëž«í¼ì´ 32ë¹„íŠ¸ê°€ ë§žëŠ”ì§€ í™•ì¸
 conda info
-# ÆÄÀÌ½ã, pip ¹öÀü È®ÀÎ
+# íŒŒì´ì¬, pip ë²„ì „ í™•ì¸
 python -V
 pip -V
-# ÆÄÀÌ½ã ÀÎÅÍÇÁ¸®ÅÍµµ 32ºñÆ®·Î ¼³Ä¡µÇ¾ú´ÂÁö È®ÀÎ
+# íŒŒì´ì¬ ì¸í„°í”„ë¦¬í„°ë„ 32ë¹„íŠ¸ë¡œ ì„¤ì¹˜ë˜ì—ˆëŠ”ì§€ í™•ì¸
 python
 import platform
 platform.architecture()
 exit()
-# ÇÊ¿äÇÑ ÆÐÅ°Áöµé ¼³Ä¡
+# í•„ìš”í•œ íŒ¨í‚¤ì§€ë“¤ ì„¤ì¹˜
 pip install -r requirements.txt
-# ¼³Ä¡µÈ ÆÐÅ°Áöµé ¸ñ·Ï°ú ¹öÀü È®ÀÎ
+# ì„¤ì¹˜ëœ íŒ¨í‚¤ì§€ë“¤ ëª©ë¡ê³¼ ë²„ì „ í™•ì¸
 pip list
-# ÇâÈÄ °£ÆíÇÑ È¯°æ±¸ÃàÀ» À§ÇØ È¯°æÁ¤ÀÇ ÆÄÀÏ ÃßÃâ
+# í–¥í›„ ê°„íŽ¸í•œ í™˜ê²½êµ¬ì¶•ì„ ìœ„í•´ í™˜ê²½ì •ì˜ íŒŒì¼ ì¶”ì¶œ
 conda env export --no-builds > environment_py38.yml
-# º¸´Ù °£ÆíÇÑ »ç¿ëÀ» À§ÇØ È¯°æÁ¤ÀÇ ÆÄÀÏ ¼öÁ¤
-(name ºÎºÐ°ú prefix ºÎºÐÀ» Á¦°ÅÇÏ¿© ¼³Ä¡À§Ä¡¸¦ Á¤ÀÇÇÏÁö ¾ÊÀ½)
-(channels°ú variables¸¦ ÅëÇØ ¸î ºñÆ® È¯°æÀÎÁö Á¤ÀÇ)
-# °¡»óÈ¯°æ ºñÈ°¼ºÈ­
+# ë³´ë‹¤ ê°„íŽ¸í•œ ì‚¬ìš©ì„ ìœ„í•´ í™˜ê²½ì •ì˜ íŒŒì¼ ìˆ˜ì •
+(name ë¶€ë¶„ê³¼ prefix ë¶€ë¶„ì„ ì œê±°í•˜ì—¬ ì„¤ì¹˜ìœ„ì¹˜ë¥¼ ì •ì˜í•˜ì§€ ì•ŠìŒ)
+(channelsê³¼ variablesë¥¼ í†µí•´ ëª‡ ë¹„íŠ¸ í™˜ê²½ì¸ì§€ ì •ì˜)
+# ê°€ìƒí™˜ê²½ ë¹„í™œì„±í™”
 conda deactivate
-# °¡»óÈ¯°æ Á¦°Å
-conda remove -p py38 --all
-# ¼³Ä¡µÈ °¡»óÈ¯°æ ¸ñ·Ï È®ÀÎ
+# ê°€ìƒí™˜ê²½ ì œê±°
+conda remove -n py38 --all
+# ì„¤ì¹˜ëœ ê°€ìƒí™˜ê²½ ëª©ë¡ í™•ì¸
 conda env list

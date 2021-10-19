@@ -3,11 +3,10 @@ channels:
   - defaults
 dependencies:
   - ca-certificates=2021.9.30
-  - certifi=2021.5.30
+  - certifi=2021.10.8
   - openssl=1.1.1l
   - pip=21.0.1
   - python=3.8.8
-  - pywin32=227
   - setuptools=58.0.4
   - sqlite=3.36.0
   - vc=14.2
@@ -17,13 +16,12 @@ dependencies:
   - pip:
     - altgraph==0.17.2
     - beautifulsoup4==4.10.0
-    - charset-normalizer==2.0.6
+    - charset-normalizer==2.0.7
     - future==0.18.2
-    - idna==3.2
+    - idna==3.3
     - pefile==2021.9.3
     - pyinstaller==4.5.1
     - pyinstaller-hooks-contrib==2021.3
-    - pypiwin32==223
     - pyqt5==5.15.4
     - pyqt5-qt5==5.15.2
     - pyqt5-sip==12.9.0
@@ -32,5 +30,5 @@ dependencies:
     - soupsieve==2.2.1
     - tk==0.1.0
     - urllib3==1.26.7
-    - win10toast-click==0.1.2
+    - zroya==0.2.4
 prefix: C:\ProgramData\Anaconda3\envs\py38

@@ -1,23 +1,23 @@
-[32ºñÆ® ¹öÀü]
-ÇöÀç µğ·ºÅä¸®¸¦ 32bit Æú´õ·Î º¯°æ
+ï»¿[32ë¹„íŠ¸ ë²„ì „]
+í˜„ì¬ ë””ë ‰í† ë¦¬ë¥¼ 32bit í´ë”ë¡œ ë³€ê²½
 cd 32bit
-# 32ºñÆ® °¡»óÈ¯°æ ¼³Ä¡
+# 32ë¹„íŠ¸ ê°€ìƒí™˜ê²½ ì„¤ì¹˜
 conda env create -f environment_py38_32.yml -p .\py38_32
-# °¡»óÈ¯°æ È°¼ºÈ­
+# ê°€ìƒí™˜ê²½ í™œì„±í™”
 conda activate .\py38_32
-# 32ºñÆ® ¹öÀü exeÆÄÀÏ Æ÷ÆÃ
-pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="¾ÆÄ«¶óÀÌºê »õ±Û ¾Ë¸®¹Ì 32bit.exe" ..\main.py
-# °¡»óÈ¯°æ ºñÈ°¼ºÈ­
+# 32ë¹„íŠ¸ ë²„ì „ exeíŒŒì¼ í¬íŒ…
+pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="ì•„ì¹´ë¼ì´ë¸Œ ìƒˆê¸€ ì•Œë¦¬ë¯¸ 32bit.exe" ..\main.py
+# ê°€ìƒí™˜ê²½ ë¹„í™œì„±í™”
 conda deactivate
 
-[64ºñÆ® ¹öÀü]
-# ÇöÀç µğ·ºÅä¸®¸¦ 64bit Æú´õ·Î º¯°æ
+[64ë¹„íŠ¸ ë²„ì „]
+# í˜„ì¬ ë””ë ‰í† ë¦¬ë¥¼ 64bit í´ë”ë¡œ ë³€ê²½
 cd 64bit
-# 64ºñÆ® °¡»óÈ¯°æ ¼³Ä¡
+# 64ë¹„íŠ¸ ê°€ìƒí™˜ê²½ ì„¤ì¹˜
 conda env create -f environment_py38_64.yml -p .\py38_64
-# °¡»óÈ¯°æ È°¼ºÈ­
+# ê°€ìƒí™˜ê²½ í™œì„±í™”
 conda activate .\py38_64
-# 64ºñÆ® ¹öÀü exeÆÄÀÏ Æ÷ÆÃ
-pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="¾ÆÄ«¶óÀÌºê »õ±Û ¾Ë¸®¹Ì 64bit.exe" ..\main.py
-# °¡»óÈ¯°æ ºñÈ°¼ºÈ­
+# 64ë¹„íŠ¸ ë²„ì „ exeíŒŒì¼ í¬íŒ…
+pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="ì•„ì¹´ë¼ì´ë¸Œ ìƒˆê¸€ ì•Œë¦¬ë¯¸ 64bit.exe" ..\main.py
+# ê°€ìƒí™˜ê²½ ë¹„í™œì„±í™”
 conda deactivate
