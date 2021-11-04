@@ -17,8 +17,8 @@
       https://stackoverflow.com/questions/63867448/interactive-notification-windows-10-using-python
       https://cjsal95.tistory.com/35
       https://m.blog.naver.com/scyan2011/221723880069
-      https://m.blog.naver.com/scyan2011/221723880069
       https://wikidocs.net/26
+      https://pythonblog.co.kr/coding/11/
 '''
 '''
 사용 전 필수 설정사항
@@ -79,7 +79,7 @@ class MyApp(QWidget):
       self.addr.setText("https://gall.dcinside.com/mgallery/board/lists?id=aoegame")
 
       text1 = QLabel('갤러리 주소')
-      togomi = QLabel('버전 : 1.5.0')
+      togomi = QLabel('버전 : 1.5.1')
 
       # 시작/중지 버튼
       btn1 = QPushButton('시작', self)
@@ -149,9 +149,18 @@ class MyApp(QWidget):
       html = get_html(self.addr.text())
       soup = BeautifulSoup(html, 'html.parser')
 
+      # 말머리 리스트 가져오기
+      subject_list = []
+      try:
+          center_box = soup.find('div', attrs={'class': 'center_box'})
+          for t in center_box.select('li'):
+              subject_list.append(t.text)
+      except AttributeError:
+          print("말머리 없음")
+
       # 받아온 html에서 글 번호만 파싱
       try:
-          l = soup.find("tbody").find_all("td", class_="gall_num")
+          init_check = soup.find("tbody").find_all("tr", class_="ub-content us-post")
       except AttributeError:
           QMessageBox.about(self, "오류", "갤러리 주소가 잘못되었습니다.")
           return
@@ -161,15 +170,15 @@ class MyApp(QWidget):
       self._lock.acquire()
       recent = 1
 
-      for idx in l:
-          if (not idx.text.isdecimal()):
+      for idx in init_check:
+          init_num = idx.select_one('td.gall_num').text
+          if (not init_num.isdecimal()):
               continue
-          if (recent < int(idx.text)):
-              recent = int(idx.text)
+          if (recent < int(init_num)):
+              recent = int(init_num)
 
       self._lock.release()
-
-      QMessageBox.about(self, "실행", "알림이 시작 되었습니다.\n이 창을 닫으셔도 좋습니다.")
+      QMessageBox.about(self, "실행", "알림이 시작 되었습니다.")
 
       # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
       def run():
@@ -188,6 +197,7 @@ class MyApp(QWidget):
               sp = BeautifulSoup(html, 'html.parser')
               new_post = sp.find("tbody")
 
+              new_subject = new_post.find_all("td", class_="gall_subject")
               new_title = new_post.find_all("td", class_="gall_tit ub-word")
               new_name = new_post.find_all("td", class_="gall_writer ub-writer")
               new_num = new_post.find_all("td", class_="gall_num")
@@ -201,6 +211,11 @@ class MyApp(QWidget):
                   if (not n.text.isdecimal()):
                       n_idx = n_idx + 1
                       continue
+                  # 마이너 갤러리(말머리가 존재하는 갤러리)인데, 말머리에 포함되지 않는 글이라면,
+                  # 디씨에서 자체적으로 올린 '설문'등의 글이라고 판단하여 스킵
+                  if len(subject_list) != 0:
+                      if (new_subject[size-n_idx-1].text not in subject_list):
+                          continue
                   # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
                   if (int(n.text) > recent):
                       recent = int(n.text)
@@ -209,13 +224,13 @@ class MyApp(QWidget):
                       link = new_title[size-n_idx-1].a.attrs['href']
                       # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                       if k_off.isChecked():
-                          toaster.show_toast(title, name, icon_path="dc_image.ico", duration=3, callback_on_click=action)
+                          toaster.show_toast(title, name, icon_path="image.ico", duration=3, callback_on_click=action)
                           skip = True
                       # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
                       if k_on.isChecked():
                           for key in range(keyword.count()):
                               if keyword.item(key).text() in title:
-                                  toaster.show_toast(title, name, icon_path="dc_image.ico", duration=3, callback_on_click=action)
+                                  toaster.show_toast(title, name, icon_path="image.ico", duration=3, callback_on_click=action)
                                   skip = True
                                   break
                   n_idx = n_idx + 1
