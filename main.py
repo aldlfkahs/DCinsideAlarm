@@ -80,17 +80,21 @@ class MyApp(QWidget):
 
       text1 = QLabel('갤러리 주소')
       togomi = QLabel('버전 : 1.5.2')
+      text1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
       # 시작/중지 버튼
+      global btn1, btn2
       btn1 = QPushButton('시작', self)
       btn1.clicked.connect(self.button1Function)
       btn2 = QPushButton('중지', self)
       btn2.clicked.connect(self.button2Function)
+      btn2.setEnabled(False)
 
       text2 = QLabel('키워드')
 
       global keyword
       keyword = QListWidget()
+      keyword.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
       # 키워드 온/오프 버튼
       global k_on, k_off
@@ -129,6 +133,9 @@ class MyApp(QWidget):
       grid.addWidget(btn4, 5, 4)
       grid.addWidget(btn5, 6, 4)
       grid.addWidget(btn6, 7, 4)
+
+      #grid.setColumnStretch(0, 1)
+      #grid.setRowStretch(1, 1)
 
       self.setWindowTitle('DC 새글 알리미')
       self.setWindowIcon(QIcon('icon.png'))
@@ -174,8 +181,9 @@ class MyApp(QWidget):
           if (recent < int(init_num)):
               recent = int(init_num)
       self._lock.release()
+      btn1.setEnabled(False)
+      btn2.setEnabled(True)
       QMessageBox.about(self, "실행", "알림이 시작 되었습니다.")
-
       # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
       def run():
           global recent
@@ -248,6 +256,8 @@ class MyApp(QWidget):
   def button2Function(self):
       global flag
       flag = False
+      btn1.setEnabled(True)
+      btn2.setEnabled(False)
       QMessageBox.about(self, "중지", "알림이 중지 되었습니다.")
 
   # 키워드 추가 버튼
