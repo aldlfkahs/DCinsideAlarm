@@ -79,7 +79,7 @@ class MyApp(QWidget):
       self.addr.setText("https://gall.dcinside.com/mgallery/board/lists?id=aoegame")
 
       text1 = QLabel('갤러리 주소')
-      togomi = QLabel('버전 : 1.5.1')
+      togomi = QLabel('버전 : 1.5.2')
 
       # 시작/중지 버튼
       btn1 = QPushButton('시작', self)
@@ -157,26 +157,22 @@ class MyApp(QWidget):
               subject_list.append(t.text)
       except AttributeError:
           print("말머리 없음")
-
       # 받아온 html에서 글 번호만 파싱
       try:
           init_check = soup.find("tbody").find_all("tr", class_="ub-content us-post")
       except AttributeError:
           QMessageBox.about(self, "오류", "갤러리 주소가 잘못되었습니다.")
           return
-
       # recent 변수에 현재 최신 글 번호를 저장
       global recent
       self._lock.acquire()
       recent = 1
-
       for idx in init_check:
           init_num = idx.select_one('td.gall_num').text
           if (not init_num.isdecimal()):
               continue
           if (recent < int(init_num)):
               recent = int(init_num)
-
       self._lock.release()
       QMessageBox.about(self, "실행", "알림이 시작 되었습니다.")
 
@@ -215,6 +211,7 @@ class MyApp(QWidget):
                   # 디씨에서 자체적으로 올린 '설문'등의 글이라고 판단하여 스킵
                   if len(subject_list) != 0:
                       if (new_subject[size-n_idx-1].text not in subject_list):
+                          n_idx = n_idx + 1
                           continue
                   # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
                   if (int(n.text) > recent):
