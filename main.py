@@ -44,7 +44,7 @@ import tkinter
 from tkinter import filedialog
 import re
 
-version = '1.5.1'
+version = '1.6.0'
 status = zroya.init(
     app_name="ArcaliveAlarm",
     company_name="python",
@@ -104,7 +104,7 @@ class MyApp(QWidget):
         self.setLayout(grid)
 
         self.addr = QLineEdit("", self)
-        self.addr.setText("https://arca.live/b/singbung")
+        self.addr.setText("https://arca.live/b/counterside")
 
         text1 = QLabel('채널 주소')
         togomi = QLabel(f'버전 : {version}')
@@ -191,7 +191,7 @@ class MyApp(QWidget):
 
         # 받아온 html에서 게시글 주소만 파싱
         try:
-            l = soup.find("div", class_="list-table").find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
+            l = soup.find("div", class_="list-table").find_all('a', class_=lambda x: x == "vrow column") #find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
         except AttributeError:
             QMessageBox.about(self, "오류", "채널 주소가 잘못되었습니다.")
             return
@@ -234,7 +234,7 @@ class MyApp(QWidget):
                 new_post = soup.find("div", class_="list-table")
 
                 # 게시글 주소 (정확히 vrow라는 이름의 class만 가져오기 위해 lambda로 구현)
-                new_link = new_post.find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
+                new_link = new_post.find_all('a', class_=lambda x: x == "vrow column") #find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
 
                 # 새로 가져온 리스트의 글 번호들을 비교
                 for n in reversed(new_link):
