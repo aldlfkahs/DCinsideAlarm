@@ -43,8 +43,9 @@ import zroya
 import tkinter
 from tkinter import filedialog
 import re
+import cloudscraper
 
-version = '1.6.0'
+version = '1.7.0'
 status = zroya.init(
     app_name="ArcaliveAlarm",
     company_name="python",
@@ -52,7 +53,8 @@ status = zroya.init(
     sub_product="python",
     version=f"v{version}"
 )
-user_agent = {'User-agent': 'Mozilla/5.0'}
+user_agent = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'}
+scraper = cloudscraper.create_scraper()
 
 # url로 get 요청을 보내는 함수
 def get_html(url):
@@ -60,7 +62,7 @@ def get_html(url):
     suc = False
     while(suc == False):
         try:
-            resp = requests.get(url,headers=user_agent)
+            resp = scraper.get(url)
         except requests.exceptions.RequestException as e:
             time.sleep(3)
             continue
@@ -191,9 +193,9 @@ class MyApp(QWidget):
 
         # 받아온 html에서 게시글 주소만 파싱
         try:
-            l = soup.find("div", class_="list-table").find_all('a', class_=lambda x: x == "vrow column") #find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
-        except AttributeError:
-            QMessageBox.about(self, "오류", "채널 주소가 잘못되었습니다.")
+            l = soup.find("div", class_="list-table table").find_all('a', class_=lambda x: x == "vrow column") #find_all(lambda tag: tag.name == 'a' and tag.get('class') == ['vrow'])
+        except AttributeError as e:
+            QMessageBox.about(self, "오류", "파싱 에러... 블로그 댓글로 문의해주세요")
             return
 
         self._lock.acquire()
