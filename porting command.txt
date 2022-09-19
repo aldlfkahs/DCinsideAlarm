@@ -21,3 +21,9 @@ conda activate .\py38_64
 pyinstaller --noconsole --onefile --icon="..\icon.ico" --add-data="..\icon.png;." --add-data="..\arca_image.ico;." --name="아카라이브 새글 알리미 64bit.exe" ..\main.py
 # 가상환경 비활성화
 conda deactivate
+
+# 1.7.0버전 부터는 cloudscraper 포함시켜서 pyinstaller 실행해야 함
+--add-data="build/cloudscraper/;./cloudscraper/"
+
+# pyinstaller 디버깅 방법
+--windowed 옵션 삭제, --debug all 옵션 추가

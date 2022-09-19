@@ -1,6 +1,9 @@
-PyQt5
-requests
-beautifulsoup4
-zroya
+PyQt5~=5.15.0
+requests~=2.24.0
+beautifulsoup4~=4.9.1
+zroya~=0.2.4
 tk
 pyinstaller
+
+future~=0.18.2
+cloudscraper~=1.2.64
