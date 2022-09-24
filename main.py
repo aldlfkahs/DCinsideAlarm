@@ -53,9 +53,11 @@ except ImportError:
     zroya = None
 import re
 import yaml
+import smtplib
 import cerberus
+from email.message import EmailMessage
 
-version = '1.7.2'
+version = '1.8.0'
 
 class get_default_logger(object):
     def __new__(cls):
@@ -77,9 +79,13 @@ class get_validator(object):
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             schema = {
+                'config_name': {'type': 'string'},
                 'channel_url': {'type': 'string'},
                 'use_filtering': {'type': 'boolean'},
                 'keyword_list': {'type': 'list', 'schema': {'type': 'string'}},
+                'notify_type': {'type': 'dict', 'schema': {'Desktop': {'type': 'boolean'}, 'Mobile': {'type': 'boolean'}}},
+                'email': {'type': 'string'},
+                'passwd': {'type': 'string'}
             }
             cls.instance = cerberus.Validator(schema, require_all=True)
         return cls.instance
@@ -88,9 +94,13 @@ class get_default_config(object):
     def __new__(cls):
         if not hasattr(cls, 'instance'):
             default_config = dict()
+            default_config['config_name'] = 'default'
             default_config['channel_url'] = 'https://arca.live/b/singbung'
             default_config['use_filtering'] = False
             default_config['keyword_list'] = []
+            default_config['notify_type'] = {'Desktop': True, 'Mobile': False}
+            default_config['email'] = ''
+            default_config['passwd'] = ''
             cls.instance = default_config
         return cls.instance
 
@@ -168,39 +178,72 @@ def show_toast(title, body, link):
     else:
         return None
 
+def send_email(subject, content, email, passwd):
+    if email and passwd:
+        msg = EmailMessage()
+        msg.set_content(content)
+        msg['Subject'] = subject
+        msg['From'] = email
+        msg['To'] = email
+        try:
+            email_domain = email.split('@').pop()
+            smtp_server = f'smtp.{email_domain}'
+            with smtplib.SMTP(smtp_server, 587) as smtp:
+                smtp.starttls()
+                smtp.login(email, passwd)
+                smtp.send_message(msg)
+        except smtplib.SMTPException as e:
+            return e
+        else:
+            return None
+    else:
+        return ValueError('email or password is blank.')
+
 def load_config():
     if os.path.exists('config.yaml'):
         try:
             with open('config.yaml', 'r', encoding='utf-8') as yaml_file:
-                yaml_data = yaml.safe_load(yaml_file)
+                yaml_data = list(yaml.safe_load_all(yaml_file))
         except yaml.YAMLError as e:
             get_default_logger().warning('yaml 파일을 불러오지 못했습니다.', exc_info=e)
-            return get_default_config()
+            return [get_default_config()]
         else:
-            if get_validator().validate(yaml_data):
-                return yaml_data
-            else:
-                get_default_logger().warning('불러온 데이터의 검증에 실패했습니다.', exc_info=ValueError(f'Invalid Config: {yaml_data}'))
-                return get_default_config()
+            config_data = list()
+            for i in range(len(yaml_data)):
+                if get_validator().validate(yaml_data[i]):
+                    if yaml_data[i]['config_name'] == 'default':
+                        config_data.insert(0, yaml_data[i])
+                    else:
+                        config_data.append(yaml_data[i])
+                else:
+                    get_default_logger().warning('검증에 실패한 config를 제외했습니다.', exc_info=ValueError(f'Invalid Config: {yaml_data[i]}'))
+            if len(config_data) == 0 or config_data[0]['config_name'] != 'default':
+                config_data.insert(0, get_default_config())
+            return config_data
     else:
-        return get_default_config()
+        return [get_default_config()]
 
 def save_config(config_data):
     with open('config.yaml', 'w', encoding='utf-8') as yaml_file:
-        yaml.safe_dump(config_data, yaml_file, indent=2, sort_keys=False, default_flow_style=False, allow_unicode=True)
+        yaml.safe_dump_all(config_data, yaml_file, indent=2, sort_keys=False, default_flow_style=False, allow_unicode=True)
 
 class Notification(QThread):
 
     error = pyqtSignal(str)
     done = pyqtSignal(bool)
 
-    def __init__(self, url, keyword_list, parent=None):
+    def __init__(self, url, use_desktop, use_mobile, email, passwd, keyword_list, parent=None):
         super().__init__(parent)
         self.url = url.lower()
+        self.use_desktop = use_desktop
+        self.use_mobile = use_mobile
+        self.email = email
+        self.passwd = passwd
         self.keyword_list = keyword_list
         self.logger = get_default_logger()
         self.flag = True
-        attrs = dict(url=url, keyword_list=keyword_list)
+        attrs = dict(url=url, use_desktop=use_desktop, use_mobile=use_mobile,
+                        email=email, passwd=passwd, keyword_list=keyword_list)
         self.logger.debug(f'Notification init: {attrs}')
 
 
@@ -362,11 +405,20 @@ class Notification(QThread):
 
     def notification_action(self, title_f, author, post_id):
         full_link = f'https://arca.live/b/{self.channel_id}/{post_id}'
-        e = show_toast(title_f, author, full_link)
-        if e is None:
-            self.logger.info(f'윈도우 알림 생성 성공')
-        else:
-            self.logger.error('윈도우 알림 생성에 실패했습니다.', exc_info=e)
+        if self.use_desktop:
+            e = show_toast(title_f, author, full_link)
+            if e is None:
+                self.logger.info(f'윈도우 알림 생성 성공')
+            else:
+                self.logger.error('윈도우 알림 생성에 실패했습니다.', exc_info=e)
+        if self.use_mobile:
+            subject = '[ArcaAlarm] new post'
+            content = f'Title: {title_f}\nAuthor: {author}\n\n{full_link}'
+            e = send_email(subject, content, self.email, self.passwd)
+            if e is None:
+                self.logger.info(f'이메일 알림 전송 성공')
+            else:
+                self.logger.error('이메일 알림 전송에 실패했습니다.', exc_info=e)
 
     def stop(self):
         self.flag = False
@@ -381,7 +433,8 @@ class MyApp(QWidget):
         self.thread = None
 
     def get_main_UI(self):
-        grid = QGridLayout(self)
+        widget = QWidget(self)
+        grid = QGridLayout(widget)
 
         self.urlLE = QLineEdit('', self)
         self.urlLb = QLabel('채널 주소')
@@ -412,13 +465,11 @@ class MyApp(QWidget):
         self.k_removeBtn = QPushButton('삭제', self)
         self.k_removeBtn.clicked.connect(self.k_remove)
 
-        # 설정 저장, 불러오기, 초기화 버튼
+        # 설정 저장, 기타 설정 버튼
         self.saveCrntBtn = QPushButton('저장', self)
         self.saveCrntBtn.clicked.connect(self.currentConfigSave)
-        self.loadCrntBtn = QPushButton('불러오기', self)
-        self.loadCrntBtn.clicked.connect(self.currentConfigLoad)
-        self.resetCrntBtn = QPushButton('초기화', self)
-        self.resetCrntBtn.clicked.connect(self.currentConfigReset)
+        self.settingBtn = QPushButton('기타 설정', self)
+        self.settingBtn.clicked.connect(self.toSettingPage)
 
         # 위에서 선언한 위젯들의 위치를 지정
         grid.addWidget(self.urlLb, 0, 0)
@@ -429,23 +480,92 @@ class MyApp(QWidget):
         grid.addWidget(self.k_onRB, 3, 1)
         grid.addWidget(self.k_offRB, 3, 2)
         grid.addWidget(self.newItemLE, 3, 3)
-        grid.addWidget(self.resetCrntBtn, 3, 4)
         grid.addWidget(self.keywordLW, 4, 0, 4, 4)
         grid.addWidget(self.k_appendBtn, 4, 4)
         grid.addWidget(self.k_removeBtn, 5, 4)
         grid.addWidget(self.saveCrntBtn, 6, 4)
-        grid.addWidget(self.loadCrntBtn, 7, 4)
+        grid.addWidget(self.settingBtn, 7, 4)
 
-        return grid
+        return widget
+
+    def get_setting_UI(self):
+        widget = QWidget(self)
+        grid = QGridLayout(widget)
+
+        self.settingLb = QLabel('기타 설정')
+        self.settingLb.setAlignment(Qt.AlignTop)
+        self.s_versionLb = QLabel(f'버전 : {version}')
+        self.s_versionLb.setAlignment(Qt.AlignTop)
+
+        self.nt_typeLb = QLabel('알림 방식')
+
+        # 알림 방식 선택 버튼
+        self.nt_desktopRB = QRadioButton('데스크톱', self)
+        self.nt_mobileRB = QRadioButton('모바일', self)
+        self.nt_bothRB = QRadioButton('모두', self)
+        self.nt_group = QButtonGroup(self)
+        self.nt_group.addButton(self.nt_desktopRB)
+        self.nt_group.addButton(self.nt_mobileRB)
+        self.nt_group.addButton(self.nt_bothRB)
+
+        self.emailLb = QLabel('이메일')
+        self.passwdLb = QLabel('비밀번호')
+
+        self.emailLE = QLineEdit('', self)
+        self.passwdLE = QLineEdit('', self)
+        self.passwdLE.setEchoMode(QLineEdit.Password)
+
+        self.configLW = QListWidget(self)
+        self.configLW.itemDoubleClicked.connect(self.configEdit)
+        self.configLW.itemClicked.connect(self.configChanged)
+        self.configLW.itemChanged.connect(self.configChanged)
+        self.configLW.currentItemChanged.connect(lambda cur, prev: self.configChanged(prev))
+
+        # 저장/불러오기 버튼
+        self.saveBtn = QPushButton('저장', self)
+        self.saveBtn.clicked.connect(self.configSave)
+        self.loadBtn = QPushButton('불러오기', self)
+        self.loadBtn.clicked.connect(self.configLoad)
+
+        # 초기화, 나가기 버튼
+        self.resetBtn = QPushButton('초기화', self)
+        self.resetBtn.clicked.connect(self.currentConfigReset)
+        self.mainBtn = QPushButton('나가기', self)
+        self.mainBtn.clicked.connect(self.toMainPage)
+
+        # 위에서 선언한 위젯들의 위치를 지정
+        grid.addWidget(self.settingLb, 0, 0)
+        grid.addWidget(self.s_versionLb, 0, 4)
+        grid.addWidget(self.nt_typeLb, 1, 0)
+        grid.addWidget(self.nt_desktopRB, 1, 1)
+        grid.addWidget(self.nt_mobileRB, 1, 2)
+        grid.addWidget(self.nt_bothRB, 1, 3)
+        grid.addWidget(self.emailLb, 2, 0)
+        grid.addWidget(self.emailLE, 2, 1, 1, 4)
+        grid.addWidget(self.passwdLb, 3, 0)
+        grid.addWidget(self.passwdLE, 3, 1, 1, 4)
+        grid.addWidget(self.configLW, 4, 0, 4, 4)
+        grid.addWidget(self.saveBtn, 4, 4)
+        grid.addWidget(self.loadBtn, 5, 4)
+        grid.addWidget(self.resetBtn, 6, 4)
+        grid.addWidget(self.mainBtn, 7, 4)
+
+        return widget
 
     # UI 설정
     def initUI(self):
         config_data = load_config()
         save_config(config_data)
 
-        self.layout = self.get_main_UI()
+        self.layout = QStackedLayout()
 
-        self.set_config(config_data)
+        self.main_page = self.get_main_UI()
+        self.setting_page = self.get_setting_UI()
+
+        self.set_config(config_data[0])
+
+        self.layout.addWidget(self.main_page)
+        self.layout.addWidget(self.setting_page)
 
         self.setLayout(self.layout)
 
@@ -456,13 +576,20 @@ class MyApp(QWidget):
         self.show()
 
     def get_config(self):
+        use_desktop = self.nt_desktopRB.isChecked() or self.nt_bothRB.isChecked()
+        use_mobile = self.nt_mobileRB.isChecked() or self.nt_bothRB.isChecked()
         current_config = dict()
+        current_config['config_name'] = self.config_name
         current_config['channel_url'] = self.urlLE.text()
         current_config['use_filtering'] = self.k_onRB.isChecked()
         current_config['keyword_list'] = [self.keywordLW.item(i).text() for i in range(self.keywordLW.count())]
+        current_config['notify_type'] = {'Desktop': use_desktop, 'Mobile': use_mobile}
+        current_config['email'] = self.emailLE.text()
+        current_config['passwd'] = self.passwdLE.text()
         return current_config
 
     def set_config(self, init_config):
+        self.config_name = init_config['config_name']
         self.urlLE.setText(init_config['channel_url'])
         self.keywordLW.clear()
         self.keywordLW.addItems(init_config['keyword_list'])
@@ -471,6 +598,15 @@ class MyApp(QWidget):
         else:
             self.k_offRB.setChecked(True)
         self.newItemLE.clear()
+        if init_config['notify_type']['Mobile']:
+            if init_config['notify_type']['Desktop']:
+                self.nt_bothRB.setChecked(True)
+            else:
+                self.nt_mobileRB.setChecked(True)
+        else:
+            self.nt_desktopRB.setChecked(True)
+        self.emailLE.setText(init_config['email'])
+        self.passwdLE.setText(init_config['passwd'])
 
     def center(self):
         qr = self.frameGeometry()
@@ -494,11 +630,14 @@ class MyApp(QWidget):
     def startNotification(self):
         if self.startBtn.text() == '시작':
             channel_url = self.urlLE.text()
+            use_desktop = self.nt_desktopRB.isChecked() or self.nt_bothRB.isChecked()
+            use_mobile = self.nt_mobileRB.isChecked() or self.nt_bothRB.isChecked()
+            email, passwd = self.emailLE.text(), self.passwdLE.text()
             if self.k_onRB.isChecked():
                 keyword_list = [self.keywordLW.item(i).text() for i in range(self.keywordLW.count())]
             else:
                 keyword_list = None
-            self.thread = Notification(channel_url, keyword_list, parent=self)
+            self.thread = Notification(channel_url, use_desktop, use_mobile, email, passwd, keyword_list, parent=self)
             self.thread.error.connect(self.error)
             self.thread.done.connect(self.done)
             self.stop.connect(self.thread.stop)
@@ -518,18 +657,118 @@ class MyApp(QWidget):
 
     # 설정 저장 버튼
     def currentConfigSave(self):
-        save_config(self.get_config())
+        self.config_name = 'default'
+        current_config = self.get_config()
+        config_data = load_config()
+        config_data[0] = current_config
+        save_config(config_data)
         QMessageBox.information(self, "저장", "설정이 저장 되었습니다.")
 
-    # 설정 불러오기 버튼
-    def currentConfigLoad(self):
-        self.set_config(load_config())
-        QMessageBox.information(self, "불러오기", "설정을 성공적으로 불러왔습니다.")
+    # 기타 설정 버튼
+    def toSettingPage(self):
+        config_data = load_config()
 
-    # 설정 초기화 버튼
+        self.configLW.clear()
+        matched = False
+        for i in range(len(config_data)):
+            self.configLW.addItem(config_data[i]['config_name'])
+            if self.configLW.currentRow() == -1 and config_data[i]['config_name'] == self.config_name:
+                self.configLW.setCurrentRow(i)
+                matched = True
+        self.configLW.addItem('')
+        if not matched:
+            self.configLW.setCurrentRow(0)
+
+        self.layout.setCurrentIndex(1)
+
+    def configEdit(self, item):
+        current_row = self.configLW.indexFromItem(item).row()
+        if current_row == self.configLW.count()-1:
+            self.configLW.openPersistentEditor(item)
+        else:
+            current_config_name = item.text()
+            answer = QMessageBox.question(self, "삭제", f"{current_config_name} 설정을 삭제하시겠습니까?")
+
+            if answer == QMessageBox.Yes:
+                config_data = load_config()
+
+                for i in range(len(config_data)):
+                    if config_data[i]['config_name'] == current_config_name:
+                        config_data.pop(i)
+                        break
+
+                save_config(config_data)
+                self.toSettingPage()
+                QMessageBox.information(self, "삭제", "설정이 삭제되었습니다.")
+
+    def configChanged(self, item):
+        if self.configLW.isPersistentEditorOpen(item):
+            self.configLW.closePersistentEditor(item)
+            if item.text() != '':
+                self.configLW.addItem('')
+
+    # 설정 저장 버튼 (기타 설정)
+    def configSave(self):
+        current_config_name = self.configLW.currentItem().text()
+        if current_config_name == '':
+            return
+
+        answer = QMessageBox.question(self, "저장", f"설정을 {current_config_name}에 저장하시겠습니까?")
+        if answer == QMessageBox.Yes:
+            self.config_name = current_config_name
+            current_config = self.get_config()
+            config_data = load_config()
+
+            matched = False
+            for i in range(len(config_data)):
+                if config_data[i]['config_name'] == current_config_name:
+                    config_data[i] = current_config
+                    matched = True
+                    break
+            if not matched:
+                config_data.append(current_config)
+
+            save_config(config_data)
+            self.toSettingPage()
+            QMessageBox.information(self, "저장", "설정이 저장되었습니다.")
+
+    # 설정 불러오기 버튼 (기타 설정)
+    def configLoad(self):
+        current_config_name = self.configLW.currentItem().text()
+        if current_config_name == '':
+            return
+
+        answer = QMessageBox.question(self, "불러오기", f"설정 {current_config_name}을 불러오시겠습니까?")
+        if answer == QMessageBox.Yes:
+            config_data = load_config()
+
+            matched = False
+            for i in range(len(config_data)):
+                if config_data[i]['config_name'] == current_config_name:
+                    init_config = config_data[i]
+                    matched = True
+                    break
+
+            if matched:
+                self.set_config(init_config)
+                self.toSettingPage()
+                QMessageBox.information(self, "불러오기", "설정을 성공적으로 불러왔습니다.")
+            else:
+                self.toSettingPage()
+                QMessageBox.warning(self, "불러오기", "설정을 불러오는데 실패하였습니다.")
+
+    # 설정 초기화 버튼 (기타 설정)
     def currentConfigReset(self):
-        self.set_config(get_default_config())
-        QMessageBox.information(self, "초기화", "현재 설정이 초기화되었습니다.")
+        answer = QMessageBox.question(self, "초기화", "현재 설정을 초기화하시겠습니까?")
+        if answer == QMessageBox.Yes:
+            default_config = get_default_config()
+            default_config['config_name'] = self.config_name
+            self.set_config(default_config)
+            QMessageBox.information(self, "초기화", "현재 설정이 초기화되었습니다.")
+
+    # 나가기 버튼 (기타 설정)
+    def toMainPage(self):
+        self.layout.setCurrentIndex(0)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
