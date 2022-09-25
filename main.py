@@ -42,6 +42,7 @@ import websockets
 import requests
 import cloudscraper
 import time
+import psutil
 import logging
 import threading
 import webbrowser
@@ -109,8 +110,9 @@ class get_scraper(object):
     def create_new(cls):
         browsers = ['chrome', 'firefox']
         platforms = ['linux', 'windows', 'darwin']
-        if platform.system().lower() in platforms:
-            platforms.insert(0, platforms.pop(platforms.index(platform.system().lower())))
+        current_platform = platform.system().lower()
+        if current_platform in platforms:
+            platforms.insert(0, platforms.pop(platforms.index(current_platform)))
         for p in platforms:
             for b in browsers:
                 scraper = cloudscraper.create_scraper(browser={'browser': b, 'platform': p, 'mobile': False})
@@ -127,6 +129,19 @@ class get_scraper(object):
         if not hasattr(cls, 'instance'):
             cls.create_new()
         return cls.instance
+
+# 동시에 실행되고 있는 알리미 중 현재 프로세스의 인덱스를 구해주는 함수
+def get_p_index():
+    pid = os.getpid()
+    p_name = psutil.Process(pid).name()
+    same_program_pids = list()
+    for proc in psutil.process_iter():
+        if proc.name() == p_name:
+            same_program_pids.append(proc.pid)
+    try:
+        return same_program_pids.index(pid)
+    except ValueError:
+        return -1
 
 # url로 요청을 보내는 함수
 def get_html(url, method='GET', params=None, data=None):
@@ -179,25 +194,24 @@ def show_toast(title, body, link):
         return None
 
 def send_email(subject, content, email, passwd):
-    if email and passwd:
-        msg = EmailMessage()
-        msg.set_content(content)
-        msg['Subject'] = subject
-        msg['From'] = email
-        msg['To'] = email
-        try:
-            email_domain = email.split('@').pop()
-            smtp_server = f'smtp.{email_domain}'
-            with smtplib.SMTP(smtp_server, 587) as smtp:
-                smtp.starttls()
-                smtp.login(email, passwd)
-                smtp.send_message(msg)
-        except smtplib.SMTPException as e:
-            return e
-        else:
-            return None
+    msg = EmailMessage()
+    msg.set_content(content)
+    msg['Subject'] = subject
+    msg['From'] = email
+    msg['To'] = email
+    try:
+        email_domain = email.split('@').pop()
+        smtp_server = f'smtp.{email_domain}'
+        with smtplib.SMTP(smtp_server, 587, timeout=5) as smtp:
+            smtp.starttls()
+            smtp.login(email, passwd)
+            smtp.send_message(msg)
+    except smtplib.SMTPException as e:
+        return e
+    except OSError as e:
+        return e
     else:
-        return ValueError('email or password is blank.')
+        return None
 
 def load_config():
     if os.path.exists('config.yaml'):
@@ -234,7 +248,7 @@ class Notification(QThread):
 
     def __init__(self, url, use_desktop, use_mobile, email, passwd, keyword_list, parent=None):
         super().__init__(parent)
-        self.url = url.lower()
+        self.url = url
         self.use_desktop = use_desktop
         self.use_mobile = use_mobile
         self.email = email
@@ -312,6 +326,8 @@ class Notification(QThread):
         return True
 
     async def websocket_event_listener(self):
+        result = True
+        last_try = 0
         while self.flag:
             try:
                 async with websockets.connect('wss://arca.live/arcalive',
@@ -327,7 +343,13 @@ class Notification(QThread):
                                 message = await asyncio.wait_for(websocket.recv(), timeout=1)
                                 if message == 'na':
                                     self.logger.info('새글 이벤트 감지')
-                                    self.new_article_action()
+                                    await asyncio.sleep(max(get_p_index(), 0))
+                                    last_try = time.perf_counter()
+                                    result = self.new_article_action()
+                                if not result and time.perf_counter() - last_try > 30:
+                                    self.logger.info('30초 간격으로 실패한 액션 재시도')
+                                    last_try = time.perf_counter()
+                                    result = self.new_article_action()
                             except asyncio.TimeoutError:
                                 pass
                     except websockets.ConnectionClosed as e:
@@ -343,7 +365,7 @@ class Notification(QThread):
         if not isinstance(html, str):
             self.logger.error('웹 페이지를 불러오지 못했습니다.', exc_info=html)
             self.notification_action('Unknown', 'Unknown', '')
-            return
+            return False
         soup = BeautifulSoup(html, 'html.parser')
         new_post = soup.find("div", class_="list-table")
 
@@ -353,7 +375,7 @@ class Notification(QThread):
         except AttributeError:
             self.logger.error('웹 페이지 파싱에 실패했습니다.')
             self.notification_action('Unknown', 'Unknown', '')
-            return
+            return False
 
         # 새로 가져온 리스트의 글 번호들을 비교
         for n in reversed(new_link):
@@ -402,6 +424,7 @@ class Notification(QThread):
                             self.notification_action(title_f, author, post_id)
                             self.recent = post_id
                             break
+        return True
 
     def notification_action(self, title_f, author, post_id):
         full_link = f'https://arca.live/b/{self.channel_id}/{post_id}'
