@@ -345,7 +345,8 @@ class Notification(QThread):
                                     self.logger.info('새글 이벤트 감지')
                                     await asyncio.sleep(max(get_p_index(), 0))
                                     last_try = time.perf_counter()
-                                    result = self.new_article_action()
+                                    if not (result := self.new_article_action()):
+                                        self.notification_action('Unknown', 'Unknown', '')
                                 if not result and time.perf_counter() - last_try > 30:
                                     self.logger.info('30초 간격으로 실패한 액션 재시도')
                                     last_try = time.perf_counter()
@@ -364,7 +365,6 @@ class Notification(QThread):
         html = get_html(self.url)
         if not isinstance(html, str):
             self.logger.error('웹 페이지를 불러오지 못했습니다.', exc_info=html)
-            self.notification_action('Unknown', 'Unknown', '')
             return False
         soup = BeautifulSoup(html, 'html.parser')
         new_post = soup.find("div", class_="list-table")
@@ -374,7 +374,6 @@ class Notification(QThread):
             new_link = new_post.find_all('a', class_='vrow')
         except AttributeError:
             self.logger.error('웹 페이지 파싱에 실패했습니다.')
-            self.notification_action('Unknown', 'Unknown', '')
             return False
 
         # 새로 가져온 리스트의 글 번호들을 비교
