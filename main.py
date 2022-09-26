@@ -147,9 +147,9 @@ def get_p_index():
         return -1
 
 # url로 요청을 보내는 함수
-def get_html(url, method='GET', params=None, data=None):
+def get_html(url):
     try:
-        resp = get_scraper().request(method=method, url=url, params=params, data=data, timeout=5)
+        resp = get_scraper().get(url, timeout=5)
     except requests.exceptions.RequestException as e:
         return e
     except cloudscraper.exceptions.CloudflareException as e:
@@ -205,7 +205,7 @@ def send_email(subject, content, email, passwd):
     try:
         email_domain = email.split('@').pop()
         smtp_server = f'smtp.{email_domain}'
-        with smtplib.SMTP(smtp_server, 587, timeout=5) as smtp:
+        with smtplib.SMTP(smtp_server, 587) as smtp:
             smtp.starttls()
             smtp.login(email, passwd)
             smtp.send_message(msg)
