@@ -150,9 +150,8 @@ def get_p_index():
 def get_html(url):
     try:
         resp = get_scraper().get(url, timeout=5)
-    except requests.exceptions.RequestException as e:
-        return e
-    except cloudscraper.exceptions.CloudflareException as e:
+    except (requests.exceptions.RequestException,
+            cloudscraper.exceptions.CloudflareException) as e:
         return e
     else:
         if resp.status_code == 200:
@@ -209,9 +208,7 @@ def send_email(subject, content, email, passwd):
             smtp.starttls()
             smtp.login(email, passwd)
             smtp.send_message(msg)
-    except smtplib.SMTPException as e:
-        return e
-    except OSError as e:
+    except (smtplib.SMTPException, OSError) as e:
         return e
     else:
         return None
@@ -362,7 +359,7 @@ class Notification(QThread):
                                 pass
                     except (websockets.ConnectionClosed, RuntimeError) as e:
                         self.logger.warning('웹소켓 연결이 종료되었습니다.', exc_info=e)
-            except (websockets.InvalidURI, websockets.InvalidHandshake, asyncio.TimeoutError) as e:
+            except (websockets.WebSocketException, asyncio.TimeoutError, OSError) as e:
                 self.logger.warning('웹소켓 연결에 실패했습니다.', exc_info=e)
             finally:
                 if self.flag:
@@ -659,7 +656,9 @@ class MyApp(QWidget):
 
     # 시작/중지 버튼
     def startNotification(self):
-        if self.startBtn.text() == '시작':
+        if self.startBtn.text() == '중지':
+            self.stop.emit()
+        elif self.thread is None or self.thread.isFinished():
             channel_url = self.urlLE.text()
             use_desktop = self.nt_desktopRB.isChecked() or self.nt_bothRB.isChecked()
             use_mobile = self.nt_mobileRB.isChecked() or self.nt_bothRB.isChecked()
@@ -673,8 +672,6 @@ class MyApp(QWidget):
             self.thread.done.connect(self.done)
             self.stop.connect(self.thread.stop)
             self.thread.start()
-        else:
-            self.stop.emit()
 
     # 키워드 추가 버튼
     def k_append(self):
