@@ -328,8 +328,7 @@ class Notification(QThread):
     async def websocket_event_listener(self):
         result = True
         last_try_time = 0
-        request_interval = 3
-        websocket_interval = 3
+        backoff_interval = 3
         while self.flag:
             try:
                 async with websockets.connect('wss://arca.live/arcalive',
@@ -337,7 +336,6 @@ class Notification(QThread):
                                                 origin='https://arca.live',
                                                 extra_headers=get_scraper().headers) as websocket:
                     try:
-                        websocket_interval = 3
                         self.logger.info('웹소켓 연결 성공')
                         await websocket.send('hello')
                         await websocket.send(f'c|{self.location}')
@@ -345,13 +343,13 @@ class Notification(QThread):
                             try:
                                 message = await asyncio.wait_for(websocket.recv(), timeout=1)
                                 if message == 'na':
-                                    request_interval = 3
+                                    backoff_interval = 3
                                     self.logger.info('새글 이벤트 감지')
                                     await asyncio.sleep(max(get_p_index(), 0))
                                     last_try_time = time.perf_counter()
                                     result = self.new_article_action()
-                                if not result and time.perf_counter() - last_try_time > request_interval:
-                                    request_interval = min(request_interval ** 1.5, 60)
+                                if not result and time.perf_counter() - last_try_time > backoff_interval:
+                                    backoff_interval = min(backoff_interval ** 1.5, 60)
                                     self.logger.info('지수 백오프로 실패한 이벤트 처리 재시도')
                                     last_try_time = time.perf_counter()
                                     result = self.new_article_action()
@@ -363,9 +361,11 @@ class Notification(QThread):
                 self.logger.warning('웹소켓 연결에 실패했습니다.', exc_info=e)
             finally:
                 if self.flag:
-                    await asyncio.sleep(websocket_interval)
-                    websocket_interval = min(websocket_interval ** 1.5, 60)
-                    self.logger.info('지수 백오프로 웹소켓 연결 재시도')
+                    await asyncio.sleep(backoff_interval)
+                    backoff_interval = min(backoff_interval ** 1.5, 60)
+                    self.logger.info('지수 백오프로 웹소켓 연결 재시도 및 누락된 이벤트 탐색')
+                    last_try_time = time.perf_counter()
+                    result = self.new_article_action()
 
     def new_article_action(self):
         html = get_html(self.url)
