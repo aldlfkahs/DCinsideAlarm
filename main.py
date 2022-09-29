@@ -58,7 +58,7 @@ import smtplib
 import cerberus
 from email.message import EmailMessage
 
-version = '1.8.0'
+version = '1.8.1'
 
 class get_default_logger(object):
     def __new__(cls):
@@ -135,21 +135,23 @@ def get_p_index():
     pid = os.getpid()
     p_name = psutil.Process(pid).name()
     same_program_pids = list()
+    same_program_ppids = list()
     for proc in psutil.process_iter():
         if proc.name() == p_name:
             same_program_pids.append(proc.pid)
+            same_program_ppids.append(proc.ppid())
+    filtered_pids = [pid for pid in same_program_pids if pid not in same_program_ppids]
     try:
-        return same_program_pids.index(pid)
+        return filtered_pids.index(pid)
     except ValueError:
         return -1
 
 # url로 요청을 보내는 함수
-def get_html(url, method='GET', params=None, data=None):
+def get_html(url):
     try:
-        resp = get_scraper().request(method=method, url=url, params=params, data=data, timeout=5)
-    except requests.exceptions.RequestException as e:
-        return e
-    except cloudscraper.exceptions.CloudflareException as e:
+        resp = get_scraper().get(url, timeout=5)
+    except (requests.exceptions.RequestException,
+            cloudscraper.exceptions.CloudflareException) as e:
         return e
     else:
         if resp.status_code == 200:
@@ -202,13 +204,11 @@ def send_email(subject, content, email, passwd):
     try:
         email_domain = email.split('@').pop()
         smtp_server = f'smtp.{email_domain}'
-        with smtplib.SMTP(smtp_server, 587, timeout=5) as smtp:
+        with smtplib.SMTP(smtp_server, 587) as smtp:
             smtp.starttls()
             smtp.login(email, passwd)
             smtp.send_message(msg)
-    except smtplib.SMTPException as e:
-        return e
-    except OSError as e:
+    except (smtplib.SMTPException, OSError) as e:
         return e
     else:
         return None
@@ -327,7 +327,8 @@ class Notification(QThread):
 
     async def websocket_event_listener(self):
         result = True
-        last_try = 0
+        last_try_time = 0
+        backoff_interval = 3
         while self.flag:
             try:
                 async with websockets.connect('wss://arca.live/arcalive',
@@ -342,24 +343,29 @@ class Notification(QThread):
                             try:
                                 message = await asyncio.wait_for(websocket.recv(), timeout=1)
                                 if message == 'na':
+                                    backoff_interval = 3
                                     self.logger.info('새글 이벤트 감지')
                                     await asyncio.sleep(max(get_p_index(), 0))
-                                    last_try = time.perf_counter()
-                                    if not (result := self.new_article_action()):
-                                        self.notification_action('Unknown', 'Unknown', '')
-                                if not result and time.perf_counter() - last_try > 30:
-                                    self.logger.info('30초 간격으로 실패한 액션 재시도')
-                                    last_try = time.perf_counter()
+                                    last_try_time = time.perf_counter()
+                                    result = self.new_article_action()
+                                if not result and time.perf_counter() - last_try_time > backoff_interval:
+                                    backoff_interval = min(backoff_interval ** 1.5, 60)
+                                    self.logger.info('지수 백오프로 실패한 이벤트 처리 재시도')
+                                    last_try_time = time.perf_counter()
                                     result = self.new_article_action()
                             except asyncio.TimeoutError:
                                 pass
-                    except websockets.ConnectionClosed as e:
+                    except (websockets.ConnectionClosed, RuntimeError) as e:
                         self.logger.warning('웹소켓 연결이 종료되었습니다.', exc_info=e)
-            except (websockets.InvalidURI, websockets.InvalidHandshake) as e:
+            except (websockets.WebSocketException, asyncio.TimeoutError, OSError) as e:
                 self.logger.warning('웹소켓 연결에 실패했습니다.', exc_info=e)
             finally:
                 if self.flag:
-                    await asyncio.sleep(3)
+                    await asyncio.sleep(backoff_interval)
+                    backoff_interval = min(backoff_interval ** 1.5, 60)
+                    self.logger.info('지수 백오프로 웹소켓 연결 재시도 및 누락된 이벤트 탐색')
+                    last_try_time = time.perf_counter()
+                    result = self.new_article_action()
 
     def new_article_action(self):
         html = get_html(self.url)
@@ -650,7 +656,9 @@ class MyApp(QWidget):
 
     # 시작/중지 버튼
     def startNotification(self):
-        if self.startBtn.text() == '시작':
+        if self.startBtn.text() == '중지':
+            self.stop.emit()
+        elif self.thread is None or self.thread.isFinished():
             channel_url = self.urlLE.text()
             use_desktop = self.nt_desktopRB.isChecked() or self.nt_bothRB.isChecked()
             use_mobile = self.nt_mobileRB.isChecked() or self.nt_bothRB.isChecked()
@@ -664,8 +672,6 @@ class MyApp(QWidget):
             self.thread.done.connect(self.done)
             self.stop.connect(self.thread.stop)
             self.thread.start()
-        else:
-            self.stop.emit()
 
     # 키워드 추가 버튼
     def k_append(self):
