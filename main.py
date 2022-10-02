@@ -226,15 +226,15 @@ class MyApp(QWidget):
 
       # 키워드 추가/삭제 버튼
       self.k_appendBtn = QPushButton('추가', self)
-      self.k_appendBtn.clicked.connect(self.button3Function)
+      self.k_appendBtn.clicked.connect(self.appendBtnFunction)
       self.k_removeBtn = QPushButton('삭제', self)
-      self.k_removeBtn.clicked.connect(self.button4Function)
+      self.k_removeBtn.clicked.connect(self.removeBtnFunction)
 
       # 설정 저장/불러오기 버튼
       self.saveCrntBtn = QPushButton('저장', self)
-      self.saveCrntBtn.clicked.connect(self.button5Function)
+      self.saveCrntBtn.clicked.connect(self.saveCrntBtnFunction)
       self.resetBtn = QPushButton('초기화', self)
-      self.resetBtn.clicked.connect(self.button6Function)
+      self.resetBtn.clicked.connect(self.resetBtnFunction)
 
       # 위에서 선언한 위젯들의 위치를 지정
       grid.addWidget(self.urlLb, 0, 0)
@@ -375,17 +375,17 @@ class MyApp(QWidget):
       QMessageBox.about(self, "중지", "알림이 중지 되었습니다.")
 
   # 키워드 추가 버튼
-  def button3Function(self):
+  def appendBtnFunction(self):
       if self.newItem.text() != '':
           self.keyword.addItem(self.newItem.text())
 
   # 키워드 삭제 버튼
-  def button4Function(self):
+  def removeBtnFunction(self):
       select = self.keyword.currentRow()
       self.keyword.takeItem(select)
 
   # 설정 저장 버튼
-  def button5Function(self):
+  def saveCrntBtnFunction(self):
       self.config_name = 'default'
       current_config = self.get_config()
       config_data = load_config()
@@ -394,7 +394,7 @@ class MyApp(QWidget):
       QMessageBox.information(self, "저장", "설정이 저장 되었습니다.")
 
   # 설정 초기화 버튼
-  def button6Function(self):
+  def resetBtnFunction(self):
       answer = QMessageBox.question(self, "초기화", "현재 설정을 초기화하시겠습니까?")
       if answer == QMessageBox.Yes:
           default_config = get_default_config()
