@@ -52,6 +52,38 @@ flag = True
 recent = 1
 version = '1.6.0'
 
+class get_default_logger(object):
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            logger = logging.getLogger('Notification')
+            logger.setLevel(logging.DEBUG)
+            console_handler = logging.StreamHandler(stream=sys.stdout)
+            console_handler.setLevel(logging.INFO)
+            console_handler.setFormatter(logging.Formatter('%(funcName)s - %(levelname)s - %(message)s'))
+            logger.addHandler(console_handler)
+            file_handler = logging.FileHandler('Notification.log', mode='a', encoding='utf-8', delay=True)
+            file_handler.setLevel(logging.DEBUG)
+            file_handler.setFormatter(logging.Formatter(f'{os.getpid():0>4X} - %(asctime)s - %(funcName)s - %(levelname)s - %(message)s'))
+            logger.addHandler(file_handler)
+            cls.instance = logger
+        return cls.instance
+
+
+class Notification(QThread):
+
+    error = pyqtSignal(str)
+    done = pyqtSignal(bool)
+
+    def __init__(self, url, keyword_list, parent=None):
+        super().__init__(parent)
+        self.url = url
+        self.keyword_list = keyword_list
+        self.logger = get_default_logger()
+        self.flag = True
+        attrs = dict(url=url, keyword_list=keyword_list)
+        self.logger.debug(f'Notification init: {attrs}')
+
+
 def toast_setup():
     try:
         if zroya:
@@ -63,8 +95,7 @@ def toast_setup():
                 version=f"v{version}"
             )
     except Exception as e:
-        print(e)
-        #get_default_logger().warning('WinToast 초기화에 실패했습니다.', exc_info=e)
+        logger.warning('WinToast 초기화에 실패했습니다.', exc_info=e)
 
 def show_toast(title, body, link):
     try:
@@ -79,7 +110,8 @@ def show_toast(title, body, link):
                 full_link = "https://gall.dcinside.com" + link
                 webbrowser.open_new(full_link)
             zroya.show(template, on_click=onClickHandler)
-    except SystemError as e:
+    except Exception as e:
+        logger.warning('WinToast 에러가 발생했습니다.', exc_info=e)
         return e
     else:
         return None
@@ -99,6 +131,7 @@ def get_html(url):
        try:
         resp = requests.get(url,headers=user_agent)
        except requests.exceptions.RequestException as e:
+           logger.warning('웹 페이지 요청에 실패했습니다. 3초 뒤에 재시도 합니다.')
            time.sleep(3)
            continue
 
@@ -106,6 +139,7 @@ def get_html(url):
            suc = True
            _html = resp.text
        else:
+           logger.critical('웹 페이지를 불러오는 과정에서 비정상적인 응답을 받았습니다.', exc_info=resp.status.code)
            suc = True
            _html = "<tbody><td>잘못된 주소 입니다.</td></tbody>"
    return _html
@@ -116,7 +150,7 @@ def load_config():
             with open('config.yaml', 'r', encoding='utf-8') as yaml_file:
                 yaml_data = list(yaml.safe_load_all(yaml_file))
         except yaml.YAMLError as e:
-            #get_default_logger().warning('yaml 파일을 불러오지 못했습니다.', exc_info=e)
+            logger.warning('yaml 파일을 불러오지 못했습니다.', exc_info=e)
             return [get_default_config()]
         else:
             config_data = list()
@@ -128,7 +162,7 @@ def load_config():
                         config_data.append(yaml_data[i])
                 else:
                     print("검증에 실패한 config를 제외했습니다.")
-                    #get_default_logger().warning('검증에 실패한 config를 제외했습니다.', exc_info=ValueError(f'Invalid Config: {yaml_data[i]}'))
+                    logger.warning('검증에 실패한 config를 제외했습니다.', exc_info=ValueError(f'Invalid Config: {yaml_data[i]}'))
             if len(config_data) == 0 or config_data[0]['config_name'] != 'default':
                 config_data.insert(0, get_default_config())
             return config_data
@@ -166,6 +200,8 @@ class MyApp(QWidget):
 
   def __init__(self):
       super().__init__()
+      global logger
+      logger = get_default_logger()
       self.initUI()
       self._thread = None
       self._lock = threading.Lock()
@@ -269,6 +305,10 @@ class MyApp(QWidget):
 
   # 시작 버튼
   def startBtnFunction(self):
+      logger.debug('===설정 정보===')
+      keyword_list = [self.keyword.item(i).text() for i in range(self.keyword.count())]
+      logger.debug(f'\n갤러리 주소: {self.addr.text()}\n키워드 on/off: {self.k_on.isChecked()}\n키워드 목록: {keyword_list}')
+      logger.debug('=============')
       global flag
       flag = True
 
@@ -281,12 +321,15 @@ class MyApp(QWidget):
           center_box = soup.find('div', attrs={'class': 'center_box'})
           for t in center_box.select('li'):
               subject_list.append(t.text)
+          logger.info(f'말머리 리스트: {subject_list}')
       except AttributeError:
+          logger.error('말머리가 없습니다.')
           print("말머리 없음")
       # 받아온 html에서 글 번호만 파싱
       try:
           init_check = soup.find("tbody").find_all("tr", class_="ub-content us-post")
       except AttributeError:
+          logger.critical('웹 페이지 파싱에 실패했습니다.')
           QMessageBox.about(self, "오류", "갤러리 주소가 잘못되었습니다.")
           return
       # recent 변수에 현재 최신 글 번호를 저장
@@ -303,6 +346,8 @@ class MyApp(QWidget):
       self.startBtn.setEnabled(False)
       self.stopBtn.setEnabled(True)
       QMessageBox.about(self, "실행", "알림이 시작 되었습니다.")
+      logger.info(f'최신 글 번호 추출 성공: {recent}')
+      logger.info('알림 시작')
       # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
       def run():
           toast_setup()
@@ -373,6 +418,7 @@ class MyApp(QWidget):
       flag = False
       self.startBtn.setEnabled(True)
       self.stopBtn.setEnabled(False)
+      logger.info('알림 중지')
       QMessageBox.about(self, "중지", "알림이 중지 되었습니다.")
 
   # 키워드 추가 버튼
