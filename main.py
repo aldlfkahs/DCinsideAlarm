@@ -320,11 +320,11 @@ class MyApp(QWidget):
       try:
           center_box = soup.find('div', attrs={'class': 'center_box'})
           for t in center_box.select('li'):
-              subject_list.append(t.text)
+              subject_list.append(t.text[:3]) # 말머리가 5글자 이상이면, 웹 상에서 3글자로 나오기 때문에 예외처리
           logger.info(f'말머리 리스트: {subject_list}')
-      except AttributeError:
-          logger.error('말머리가 없습니다.')
-          print("말머리 없음")
+      except Exception as e:
+          logger.warning('말머리 파싱 중에 에러가 발생했습니다.', exc_info=e)
+          print(e)
       # 받아온 html에서 글 번호만 파싱
       try:
           init_check = soup.find("tbody").find_all("tr", class_="ub-content us-post")
@@ -383,7 +383,7 @@ class MyApp(QWidget):
                   # 마이너 갤러리(말머리가 존재하는 갤러리)인데, 말머리에 포함되지 않는 글이라면,
                   # 디씨에서 자체적으로 올린 '설문'등의 글이라고 판단하여 스킵
                   if len(subject_list) != 0:
-                      if (new_subject[size-n_idx-1].text not in subject_list):
+                      if (new_subject[size-n_idx-1].text[:3] not in subject_list): # 말머리가 5글자 이상이면, 웹 상에서 3글자로 나오기 때문에 예외처리
                           n_idx = n_idx + 1
                           continue
                   # 새로 가져온 글 번호가 더 크다면, 새로운 글 이라는 뜻
