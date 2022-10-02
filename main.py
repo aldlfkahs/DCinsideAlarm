@@ -70,8 +70,8 @@ def show_toast(title, body, link):
     try:
         if zroya:
             template = zroya.Template(zroya.TemplateType.ImageAndText3)
-            if os.path.exists(resource_path("image.ico")):
-                template.setImage(resource_path("image.ico"))
+            if os.path.exists(resource_path("./img/image.ico")):
+                template.setImage(resource_path("./img/image.ico"))
             template.setFirstLine(title)
             template.setSecondLine(body)
             # 클릭 시, 웹 브라우저로 연결해주는 함수
@@ -256,7 +256,7 @@ class MyApp(QWidget):
       #grid.setRowStretch(1, 1)
 
       self.setWindowTitle('DC 새글 알리미')
-      self.setWindowIcon(QIcon('icon.png'))
+      self.setWindowIcon(QIcon('./img/icon.png'))
       #self.setFixedSize(380, 200)
       self.show()
       self.set_config(config_data[0])
