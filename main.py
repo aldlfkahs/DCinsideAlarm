@@ -173,20 +173,20 @@ class MyApp(QWidget):
   def set_config(self, init_config):
       self.config_name = init_config['config_name']
       self.addr.setText(init_config['channel_url'])
-      keyword.clear()
-      keyword.addItems(init_config['keyword_list'])
+      self.keyword.clear()
+      self.keyword.addItems(init_config['keyword_list'])
       if init_config['use_filtering']:
-          k_on.setChecked(True)
+          self.k_on.setChecked(True)
       else:
-          k_off.setChecked(True)
-      newItem.clear()
+          self.k_off.setChecked(True)
+      self.newItem.clear()
 
   def get_config(self):
       current_config = dict()
       current_config['config_name'] = self.config_name
       current_config['channel_url'] = self.addr.text()
-      current_config['use_filtering'] = k_on.isChecked()
-      current_config['keyword_list'] = [keyword.item(i).text() for i in range(keyword.count())]
+      current_config['use_filtering'] = self.k_on.isChecked()
+      current_config['keyword_list'] = [self.keyword.item(i).text() for i in range(self.keyword.count())]
       return current_config
 
   # UI 설정
@@ -200,61 +200,57 @@ class MyApp(QWidget):
       self.addr = QLineEdit("", self)
       self.addr.setText("https://gall.dcinside.com/mgallery/board/lists?id=aoegame")
 
-      text1 = QLabel('갤러리 주소')
-      togomi = QLabel(f'버전 : {version}')
-      text1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+      self.urlLb = QLabel('갤러리 주소')
+      self.version = QLabel(f'버전 : {version}')
+      self.urlLb.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
       # 시작/중지 버튼
-      global btn1, btn2
-      btn1 = QPushButton('시작', self)
-      btn1.clicked.connect(self.button1Function)
-      btn2 = QPushButton('중지', self)
-      btn2.clicked.connect(self.button2Function)
-      btn2.setEnabled(False)
+      self.startBtn = QPushButton('시작', self)
+      self.startBtn.clicked.connect(self.startBtnFunction)
+      self.stopBtn = QPushButton('중지', self)
+      self.stopBtn.clicked.connect(self.stopBtnFunction)
+      self.stopBtn.setEnabled(False)
 
-      text2 = QLabel('키워드')
+      self.keywordLb = QLabel('키워드')
 
-      global keyword
-      keyword = QListWidget()
-      keyword.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+      self.keyword = QListWidget()
+      self.keyword.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
       # 키워드 온/오프 버튼
-      global k_on, k_off
-      k_on = QRadioButton('ON', self)
-      k_off = QRadioButton('OFF', self)
-      k_off.setChecked(True)
+      self.k_on = QRadioButton('ON', self)
+      self.k_off = QRadioButton('OFF', self)
+      self.k_off.setChecked(True)
 
       # 추가할 키워드 적는 칸
-      global newItem
-      newItem = QLineEdit()
+      self.newItem = QLineEdit()
 
       # 키워드 추가/삭제 버튼
-      btn3 = QPushButton('추가', self)
-      btn3.clicked.connect(self.button3Function)
-      btn4 = QPushButton('삭제', self)
-      btn4.clicked.connect(self.button4Function)
+      self.k_appendBtn = QPushButton('추가', self)
+      self.k_appendBtn.clicked.connect(self.button3Function)
+      self.k_removeBtn = QPushButton('삭제', self)
+      self.k_removeBtn.clicked.connect(self.button4Function)
 
-      # 키워드 저장/불러오기 버튼
-      btn5 = QPushButton('저장', self)
-      btn5.clicked.connect(self.button5Function)
-      btn6 = QPushButton('초기화', self)
-      btn6.clicked.connect(self.button6Function)
+      # 설정 저장/불러오기 버튼
+      self.saveCrntBtn = QPushButton('저장', self)
+      self.saveCrntBtn.clicked.connect(self.button5Function)
+      self.resetBtn = QPushButton('초기화', self)
+      self.resetBtn.clicked.connect(self.button6Function)
 
       # 위에서 선언한 위젯들의 위치를 지정
-      grid.addWidget(text1, 0, 0)
-      grid.addWidget(togomi, 0, 4)
+      grid.addWidget(self.urlLb, 0, 0)
+      grid.addWidget(self.version, 0, 4)
       grid.addWidget(self.addr, 1, 0, 1, 5)
-      grid.addWidget(btn1, 2, 0, 1, 4)
-      grid.addWidget(btn2, 2, 4)
-      grid.addWidget(text2, 3, 0)
-      grid.addWidget(k_on, 3, 1)
-      grid.addWidget(k_off, 3, 2)
-      grid.addWidget(newItem, 3, 3)
-      grid.addWidget(keyword, 4, 0, -1, 4)
-      grid.addWidget(btn3, 4, 4)
-      grid.addWidget(btn4, 5, 4)
-      grid.addWidget(btn5, 6, 4)
-      grid.addWidget(btn6, 7, 4)
+      grid.addWidget(self.startBtn, 2, 0, 1, 4)
+      grid.addWidget(self.stopBtn, 2, 4)
+      grid.addWidget(self.keywordLb, 3, 0)
+      grid.addWidget(self.k_on, 3, 1)
+      grid.addWidget(self.k_off, 3, 2)
+      grid.addWidget(self.newItem, 3, 3)
+      grid.addWidget(self.keyword, 4, 0, -1, 4)
+      grid.addWidget(self.k_appendBtn, 4, 4)
+      grid.addWidget(self.k_removeBtn, 5, 4)
+      grid.addWidget(self.saveCrntBtn, 6, 4)
+      grid.addWidget(self.resetBtn, 7, 4)
 
       #grid.setColumnStretch(0, 1)
       #grid.setRowStretch(1, 1)
@@ -272,7 +268,7 @@ class MyApp(QWidget):
       self.move(qr.topLeft())
 
   # 시작 버튼
-  def button1Function(self):
+  def startBtnFunction(self):
       global flag
       flag = True
 
@@ -304,8 +300,8 @@ class MyApp(QWidget):
           if (recent < int(init_num)):
               recent = int(init_num)
       self._lock.release()
-      btn1.setEnabled(False)
-      btn2.setEnabled(True)
+      self.startBtn.setEnabled(False)
+      self.stopBtn.setEnabled(True)
       QMessageBox.about(self, "실행", "알림이 시작 되었습니다.")
       # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
       def run():
@@ -351,13 +347,13 @@ class MyApp(QWidget):
                       title = new_title[size-n_idx-1].text
                       link = new_title[size-n_idx-1].a.attrs['href']
                       # 키워드=off 일 경우, 바로 토스트 메시지로 표시
-                      if k_off.isChecked():
+                      if self.k_off.isChecked():
                           show_toast(title, name, link)
                           skip = True
                       # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
-                      if k_on.isChecked():
-                          for key in range(keyword.count()):
-                              if keyword.item(key).text() in title:
+                      if self.k_on.isChecked():
+                          for key in range(self.keyword.count()):
+                              if self.keyword.item(key).text() in title:
                                   show_toast(title, name, link)
                                   skip = True
                                   break
@@ -371,22 +367,22 @@ class MyApp(QWidget):
           self._thread.start()
 
   # 중지 버튼
-  def button2Function(self):
+  def stopBtnFunction(self):
       global flag
       flag = False
-      btn1.setEnabled(True)
-      btn2.setEnabled(False)
+      self.startBtn.setEnabled(True)
+      self.stopBtn.setEnabled(False)
       QMessageBox.about(self, "중지", "알림이 중지 되었습니다.")
 
   # 키워드 추가 버튼
   def button3Function(self):
-      if newItem.text() != '':
-          keyword.addItem(newItem.text())
+      if self.newItem.text() != '':
+          self.keyword.addItem(self.newItem.text())
 
   # 키워드 삭제 버튼
   def button4Function(self):
-      select = keyword.currentRow()
-      keyword.takeItem(select)
+      select = self.keyword.currentRow()
+      self.keyword.takeItem(select)
 
   # 설정 저장 버튼
   def button5Function(self):
