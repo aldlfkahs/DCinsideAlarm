@@ -70,8 +70,8 @@ def show_toast(title, body, link):
     try:
         if zroya:
             template = zroya.Template(zroya.TemplateType.ImageAndText3)
-            if os.path.exists(resource_path("./img/image.ico")):
-                template.setImage(resource_path("./img/image.ico"))
+            if os.path.exists(resource_path("image.ico")):
+                template.setImage(resource_path("image.ico"))
             template.setFirstLine(title)
             template.setSecondLine(body)
             # 클릭 시, 웹 브라우저로 연결해주는 함수
@@ -256,7 +256,7 @@ class MyApp(QWidget):
       #grid.setRowStretch(1, 1)
 
       self.setWindowTitle('DC 새글 알리미')
-      self.setWindowIcon(QIcon('./img/icon.png'))
+      self.setWindowIcon(QIcon(resource_path('icon.png')))
       #self.setFixedSize(380, 200)
       self.show()
       self.set_config(config_data[0])
@@ -305,6 +305,7 @@ class MyApp(QWidget):
       QMessageBox.about(self, "실행", "알림이 시작 되었습니다.")
       # 알리미 수행 도중에도 중지 버튼을 누를 수 있게 쓰레드로 구현
       def run():
+          toast_setup()
           global recent
           global link
           skip = False
