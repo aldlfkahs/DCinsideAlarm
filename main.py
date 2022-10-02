@@ -19,6 +19,7 @@
       https://m.blog.naver.com/scyan2011/221723880069
       https://wikidocs.net/26
       https://pythonblog.co.kr/coding/11/
+      https://malja.github.io/zroya/index.html
 '''
 '''
 사용 전 필수 설정사항
@@ -26,22 +27,70 @@
 시작 -> 설정 -> 시스템 -> 알림 및 작업 
 -> 앱 및 다른 보낸사람의 알림 받기 -> 켬
 '''
+import os
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import *
 import requests
 import time
 import threading
 import webbrowser
+import logging
+import yaml
+import cerberus
 from bs4 import BeautifulSoup
-from win10toast_click import ToastNotifier
+try:
+    import zroya
+except ImportError:
+    zroya = None
 import tkinter
 from tkinter import filedialog
 
-toaster = ToastNotifier()
 user_agent = {'User-agent': 'Mozilla/5.0'}
 flag = True
 recent = 1
+version = '1.6.0'
+
+
+def toast_setup():
+    try:
+        if zroya:
+            status = zroya.init(
+                app_name="DCinsideAlarm",
+                company_name="python",
+                product_name="python",
+                sub_product="python",
+                version=f"v{version}"
+            )
+    except Exception as e:
+        print(e)
+        #get_default_logger().warning('WinToast 초기화에 실패했습니다.', exc_info=e)
+
+def show_toast(title, body, link):
+    try:
+        if zroya:
+            template = zroya.Template(zroya.TemplateType.ImageAndText3)
+            if os.path.exists(resource_path("image.ico")):
+                template.setImage(resource_path("image.ico"))
+            template.setFirstLine(title)
+            template.setSecondLine(body)
+            # 클릭 시, 웹 브라우저로 연결해주는 함수
+            def onClickHandler(notification_id):
+                full_link = "https://gall.dcinside.com" + link
+                webbrowser.open_new(full_link)
+            zroya.show(template, on_click=onClickHandler)
+    except SystemError as e:
+        return e
+    else:
+        return None
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 # url로 get 요청을 보내는 함수
 def get_html(url):
@@ -79,7 +128,7 @@ class MyApp(QWidget):
       self.addr.setText("https://gall.dcinside.com/mgallery/board/lists?id=aoegame")
 
       text1 = QLabel('갤러리 주소')
-      togomi = QLabel('버전 : 1.5.2')
+      togomi = QLabel(f'버전 : {version}')
       text1.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
       # 시작/중지 버튼
@@ -229,13 +278,13 @@ class MyApp(QWidget):
                       link = new_title[size-n_idx-1].a.attrs['href']
                       # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                       if k_off.isChecked():
-                          toaster.show_toast(title, name, icon_path="image.ico", duration=3, callback_on_click=action)
+                          show_toast(title, name, link)
                           skip = True
                       # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
                       if k_on.isChecked():
                           for key in range(keyword.count()):
                               if keyword.item(key).text() in title:
-                                  toaster.show_toast(title, name, icon_path="image.ico", duration=3, callback_on_click=action)
+                                  show_toast(title, name, link)
                                   skip = True
                                   break
                   n_idx = n_idx + 1
@@ -246,11 +295,6 @@ class MyApp(QWidget):
       if self._thread == None or not self._thread.is_alive():
           self._thread = threading.Thread(target=run, daemon=True)
           self._thread.start()
-
-      # 클릭 시, 웹 브라우저로 연결해주는 함수
-      def action():
-          full_link = "https://gall.dcinside.com" + link
-          webbrowser.open_new(full_link)
 
   # 중지 버튼
   def button2Function(self):
