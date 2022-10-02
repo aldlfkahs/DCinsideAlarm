@@ -52,7 +52,6 @@ flag = True
 recent = 1
 version = '1.6.0'
 
-
 def toast_setup():
     try:
         if zroya:
@@ -111,6 +110,58 @@ def get_html(url):
            _html = "<tbody><td>잘못된 주소 입니다.</td></tbody>"
    return _html
 
+def load_config():
+    if os.path.exists('config.yaml'):
+        try:
+            with open('config.yaml', 'r', encoding='utf-8') as yaml_file:
+                yaml_data = list(yaml.safe_load_all(yaml_file))
+        except yaml.YAMLError as e:
+            #get_default_logger().warning('yaml 파일을 불러오지 못했습니다.', exc_info=e)
+            return [get_default_config()]
+        else:
+            config_data = list()
+            for i in range(len(yaml_data)):
+                if get_validator().validate(yaml_data[i]):
+                    if yaml_data[i]['config_name'] == 'default':
+                        config_data.insert(0, yaml_data[i])
+                    else:
+                        config_data.append(yaml_data[i])
+                else:
+                    print("검증에 실패한 config를 제외했습니다.")
+                    #get_default_logger().warning('검증에 실패한 config를 제외했습니다.', exc_info=ValueError(f'Invalid Config: {yaml_data[i]}'))
+            if len(config_data) == 0 or config_data[0]['config_name'] != 'default':
+                config_data.insert(0, get_default_config())
+            return config_data
+    else:
+        return [get_default_config()]
+
+def save_config(config_data):
+    with open('config.yaml', 'w', encoding='utf-8') as yaml_file:
+        yaml.safe_dump_all(config_data, yaml_file, indent=2, sort_keys=False, default_flow_style=False, allow_unicode=True)
+
+class get_validator(object):
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            schema = {
+                'config_name': {'type': 'string'},
+                'channel_url': {'type': 'string'},
+                'use_filtering': {'type': 'boolean'},
+                'keyword_list': {'type': 'list', 'schema': {'type': 'string'}},
+            }
+            cls.instance = cerberus.Validator(schema, require_all=True)
+        return cls.instance
+
+class get_default_config(object):
+    def __new__(cls):
+        if not hasattr(cls, 'instance'):
+            default_config = dict()
+            default_config['config_name'] = 'default'
+            default_config['channel_url'] = 'https://gall.dcinside.com/mgallery/board/lists?id=aoegame'
+            default_config['use_filtering'] = False
+            default_config['keyword_list'] = []
+            cls.instance = default_config
+        return cls.instance
+
 class MyApp(QWidget):
 
   def __init__(self):
@@ -119,8 +170,30 @@ class MyApp(QWidget):
       self._thread = None
       self._lock = threading.Lock()
 
+  def set_config(self, init_config):
+      self.config_name = init_config['config_name']
+      self.addr.setText(init_config['channel_url'])
+      keyword.clear()
+      keyword.addItems(init_config['keyword_list'])
+      if init_config['use_filtering']:
+          k_on.setChecked(True)
+      else:
+          k_off.setChecked(True)
+      newItem.clear()
+
+  def get_config(self):
+      current_config = dict()
+      current_config['config_name'] = self.config_name
+      current_config['channel_url'] = self.addr.text()
+      current_config['use_filtering'] = k_on.isChecked()
+      current_config['keyword_list'] = [keyword.item(i).text() for i in range(keyword.count())]
+      return current_config
+
   # UI 설정
   def initUI(self):
+      config_data = load_config()
+      save_config(config_data)
+
       grid = QGridLayout()
       self.setLayout(grid)
 
@@ -164,7 +237,7 @@ class MyApp(QWidget):
       # 키워드 저장/불러오기 버튼
       btn5 = QPushButton('저장', self)
       btn5.clicked.connect(self.button5Function)
-      btn6 = QPushButton('불러오기', self)
+      btn6 = QPushButton('초기화', self)
       btn6.clicked.connect(self.button6Function)
 
       # 위에서 선언한 위젯들의 위치를 지정
@@ -190,6 +263,7 @@ class MyApp(QWidget):
       self.setWindowIcon(QIcon('icon.png'))
       #self.setFixedSize(380, 200)
       self.show()
+      self.set_config(config_data[0])
 
   def center(self):
       qr = self.frameGeometry()
@@ -314,54 +388,23 @@ class MyApp(QWidget):
       select = keyword.currentRow()
       keyword.takeItem(select)
 
-  # 키워드 저장 버튼
+  # 설정 저장 버튼
   def button5Function(self):
-      root = tkinter.Tk()
-      root.withdraw()
-      file_path = filedialog.asksaveasfilename(parent=root, title="키워드 저장", filetypes=(("text files", "*.txt"),("all files", "*.*")), defaultextension="txt")
-      if file_path == "":
-          # 저장이 안 됐을 시, 예외 처리
-          return
-      else:
-          # 키워드를 파일로 저장
-          f = open(file_path, 'w', encoding='utf-8')
-          f.write("[갤러리 주소]\n")
-          f.write(self.addr.text() + "\n")
-          f.write("[키워드]\n")
-          for key in range(keyword.count()):
-              f.write(keyword.item(key).text() + "\n")
-          f.close()
+      self.config_name = 'default'
+      current_config = self.get_config()
+      config_data = load_config()
+      config_data[0] = current_config
+      save_config(config_data)
+      QMessageBox.information(self, "저장", "설정이 저장 되었습니다.")
 
-  # 키워드 불러오기 버튼
+  # 설정 초기화 버튼
   def button6Function(self):
-      root = tkinter.Tk()
-      root.withdraw()
-      file_path = filedialog.askopenfilename(parent=root, title="키워드 불러오기", filetypes=(("text files", "*.txt"),("all files", "*.*")), defaultextension="txt")
-      if file_path == "":
-          # 아무것도 안 불러왔을 시, 예외 처리
-          return
-      else:
-          data = open(file_path, 'r', encoding='utf-8')
-          isURL = data.readline().rstrip('\n')
-          # 갤러리 주소 불러오기
-          if isURL != "[갤러리 주소]":
-              # 첫 줄이 [갤러리 주소]가 아니라면, 잘못된 파일을 읽은 것으로 판단
-              return
-          else:
-              self.addr.setText(data.readline().rstrip('\n'))
-
-          # 키워드 불러오기
-          isKeyword = data.readline().rstrip('\n')
-          if isKeyword != "[키워드]":
-              # [키워드]가 아니라면, 잘못된 파일을 읽은 것으로 판단
-              return
-          else:
-              lines = data.readlines()
-              keyword.clear() # 불러오기 전, 이전에 있던 키워드 삭제
-              for line in lines:
-                  keyword.addItem(line.rstrip('\n'))
-
-          data.close()
+      answer = QMessageBox.question(self, "초기화", "현재 설정을 초기화하시겠습니까?")
+      if answer == QMessageBox.Yes:
+          default_config = get_default_config()
+          default_config['config_name'] = self.config_name
+          self.set_config(default_config)
+          QMessageBox.information(self, "초기화", "현재 설정이 초기화되었습니다.")
 
 if __name__ == '__main__':
   app = QApplication(sys.argv)
