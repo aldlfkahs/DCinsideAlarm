@@ -42,6 +42,7 @@ import websockets
 import requests
 import cloudscraper
 import time
+import random
 import psutil
 import logging
 import threading
@@ -58,7 +59,7 @@ import smtplib
 import cerberus
 from email.message import EmailMessage
 
-version = '1.8.1'
+version = '1.8.2'
 
 class get_default_logger(object):
     def __new__(cls):
@@ -130,8 +131,8 @@ class get_scraper(object):
             cls.create_new()
         return cls.instance
 
-# 동시에 실행되고 있는 알리미 중 현재 프로세스의 인덱스를 구해주는 함수
-def get_p_index():
+# 동시에 실행되고 있는 알리미의 개수를 구해주는 함수
+def get_n_alarm():
     pid = os.getpid()
     p_name = psutil.Process(pid).name()
     same_program_pids = list()
@@ -141,18 +142,21 @@ def get_p_index():
             same_program_pids.append(proc.pid)
             same_program_ppids.append(proc.ppid())
     filtered_pids = [pid for pid in same_program_pids if pid not in same_program_ppids]
-    try:
-        return filtered_pids.index(pid)
-    except ValueError:
-        return -1
+    return len(filtered_pids)
 
 # url로 요청을 보내는 함수
 def get_html(url):
     try:
         resp = get_scraper().get(url, timeout=5)
-    except (requests.exceptions.RequestException,
-            cloudscraper.exceptions.CloudflareException) as e:
+    except requests.exceptions.RequestException as e:
         return e
+    except cloudscraper.exceptions.CloudflareException as e1:
+        try:
+            get_scraper.create_new()
+        except (requests.exceptions.RequestException,
+                cloudscraper.exceptions.CloudflareException) as e2:
+            get_default_logger().warning('HTTP 세션을 초기화하지 못했습니다.', exc_info=e2)
+        return e1
     else:
         if resp.status_code == 200:
             return resp.text
@@ -345,7 +349,8 @@ class Notification(QThread):
                                 if message == 'na':
                                     backoff_interval = 3
                                     self.logger.info('새글 이벤트 감지')
-                                    await asyncio.sleep(max(get_p_index(), 0))
+                                    n_alarm = max(get_n_alarm() - 1, 0)
+                                    await asyncio.sleep(random.random() * n_alarm + 1)
                                     last_try_time = time.perf_counter()
                                     result = self.new_article_action()
                                 if not result and time.perf_counter() - last_try_time > backoff_interval:
@@ -361,7 +366,12 @@ class Notification(QThread):
                 self.logger.warning('웹소켓 연결에 실패했습니다.', exc_info=e)
             finally:
                 if self.flag:
-                    await asyncio.sleep(backoff_interval)
+                    remainder = backoff_interval
+                    while remainder > 0:
+                        await asyncio.sleep(min(remainder, 1))
+                        remainder -= 1
+                        if not self.flag:
+                            return
                     backoff_interval = min(backoff_interval ** 1.5, 60)
                     self.logger.info('지수 백오프로 웹소켓 연결 재시도 및 누락된 이벤트 탐색')
                     last_try_time = time.perf_counter()
@@ -384,7 +394,7 @@ class Notification(QThread):
 
         # 새로 가져온 리스트의 글 번호들을 비교
         for n in reversed(new_link):
-            if self.flag == False:
+            if not self.flag:
                 break
             # 공지 게시글 제외
             if 'notice' in n.attrs['class']:
