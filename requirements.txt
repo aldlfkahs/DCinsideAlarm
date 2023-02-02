@@ -1,4 +1,4 @@
-PyQt5~=5.15.0
+﻿PyQt5~=5.15.0
 requests~=2.27.0
 cloudscraper~=1.2.64
 websockets~=10.3
@@ -6,5 +6,4 @@ beautifulsoup4~=4.11.0
 zroya~=0.2.4
 pyyaml~=6.0
 cerberus~=1.3.4
-psutil~=5.9.2
 pyinstaller~=5.0.0
