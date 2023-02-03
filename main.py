@@ -257,7 +257,7 @@ class Notification(QThread):
             return False
         soup = BeautifulSoup(html, 'html.parser')
 
-        # 받아온 html에서 게시글 주소만 파싱
+        # 받아온 html에서 게시글 목록 파싱
         try:
             new_post = soup.find("table", class_="gall_list").find("tbody").find_all('tr', class_='ub-content us-post')
         except AttributeError:
@@ -291,8 +291,9 @@ class Notification(QThread):
             return False
         soup = BeautifulSoup(html, 'html.parser')
 
-        # 게시글 주소
+        # 게시글 목록
         try:
+            # us-post 클래스로 운영자의 글을 제외한 일반 사용자 글만 파싱
             new_post = soup.find("table", class_="gall_list").find("tbody").find_all('tr', class_='ub-content us-post')
         except AttributeError:
             self.logger.error('웹 페이지 파싱에 실패했습니다.')
@@ -321,7 +322,9 @@ class Notification(QThread):
                     author = 'Unknown'
 
                 try:
+                    # 말머리가 존재하는 경우 말머리 추출
                     gall_subject = n.find('td', class_='gall_subject')
+                    # 말머리가 단축되어 있는 경우 풀네임 추출
                     subject_inner = gall_subject.find('p', class_='subject_inner')
                     hd = subject_inner.text.strip() if subject_inner else gall_subject.text.strip()
                     header = f'[{hd}]'
