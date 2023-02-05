@@ -42,8 +42,6 @@ import websockets
 import requests
 import cloudscraper
 import time
-import random
-import psutil
 import logging
 import threading
 import webbrowser
@@ -59,7 +57,7 @@ import smtplib
 import cerberus
 from email.message import EmailMessage
 
-version = '1.8.2'
+version = '1.8.3'
 
 class get_default_logger(object):
     def __new__(cls):
@@ -106,7 +104,7 @@ class get_default_config(object):
             cls.instance = default_config
         return cls.instance
 
-class get_scraper(object):
+class get_session(object):
     @classmethod
     def create_new(cls):
         browsers = ['chrome', 'firefox']
@@ -131,28 +129,15 @@ class get_scraper(object):
             cls.create_new()
         return cls.instance
 
-# 동시에 실행되고 있는 알리미의 개수를 구해주는 함수
-def get_n_alarm():
-    pid = os.getpid()
-    p_name = psutil.Process(pid).name()
-    same_program_pids = list()
-    same_program_ppids = list()
-    for proc in psutil.process_iter():
-        if proc.name() == p_name:
-            same_program_pids.append(proc.pid)
-            same_program_ppids.append(proc.ppid())
-    filtered_pids = [pid for pid in same_program_pids if pid not in same_program_ppids]
-    return len(filtered_pids)
-
 # url로 요청을 보내는 함수
 def get_html(url):
     try:
-        resp = get_scraper().get(url, timeout=5)
+        resp = get_session().get(url, timeout=5)
     except requests.exceptions.RequestException as e:
         return e
     except cloudscraper.exceptions.CloudflareException as e1:
         try:
-            get_scraper.create_new()
+            get_session.create_new()
         except (requests.exceptions.RequestException,
                 cloudscraper.exceptions.CloudflareException) as e2:
             get_default_logger().warning('HTTP 세션을 초기화하지 못했습니다.', exc_info=e2)
@@ -187,8 +172,8 @@ def show_toast(title, body, link):
     try:
         if zroya:
             template = zroya.Template(zroya.TemplateType.ImageAndText3)
-            if os.path.exists(resource_path("arca_image.ico")):
-                template.setImage(resource_path("arca_image.ico"))
+            if os.path.exists(resource_path("image.ico")):
+                template.setImage(resource_path("image.ico"))
             template.setFirstLine(title)
             template.setSecondLine(body)
             def onClickHandler(notification_id):
@@ -245,6 +230,57 @@ def save_config(config_data):
     with open('config.yaml', 'w', encoding='utf-8') as yaml_file:
         yaml.safe_dump_all(config_data, yaml_file, indent=2, sort_keys=False, default_flow_style=False, allow_unicode=True)
 
+class WebSocketEventListener(QThread):
+
+    send_event = pyqtSignal()
+
+    def __init__(self, location, parent=None):
+        super().__init__(parent)
+        self.location = location
+        self.logger = get_default_logger()
+        self.flag = True
+
+    def run(self):
+        while self.flag:
+            try:
+                asyncio.run(self.websocket_event_listener())
+            except Exception as e:
+                self.logger.error('웹소켓 통신 중 알 수 없는 오류 발생', exc_info=e)
+                self.send_event.emit()
+                time.sleep(3)
+
+    async def websocket_event_listener(self):
+        while self.flag:
+            try:
+                async with websockets.connect('wss://arca.live/arcalive',
+                                                subprotocols=['arcalive'],
+                                                origin='https://arca.live',
+                                                extra_headers=get_session().headers) as websocket:
+                    try:
+                        self.logger.info('웹소켓 연결 성공')
+                        await websocket.send('hello')
+                        await websocket.send(f'c|{self.location}')
+                        while self.flag:
+                            try:
+                                message = await asyncio.wait_for(websocket.recv(), timeout=1)
+                                if message == 'na':
+                                    self.send_event.emit()
+                                    self.logger.info('새글 이벤트 감지')
+                            except asyncio.TimeoutError:
+                                pass
+                    except (websockets.ConnectionClosed, RuntimeError) as e:
+                        self.logger.warning('웹소켓 연결이 종료되었습니다.', exc_info=e)
+            except (websockets.WebSocketException, asyncio.TimeoutError, OSError) as e:
+                self.logger.warning('웹소켓 연결에 실패했습니다.', exc_info=e)
+            finally:
+                if self.flag:
+                    self.send_event.emit()
+                    await asyncio.sleep(3)
+                    self.logger.info('웹소켓 연결 재시도')
+
+    def stop(self):
+        self.flag = False
+
 class Notification(QThread):
 
     error = pyqtSignal(str)
@@ -259,11 +295,11 @@ class Notification(QThread):
         self.passwd = passwd
         self.keyword_list = keyword_list
         self.logger = get_default_logger()
+        self.event_flag = False
         self.flag = True
         attrs = dict(url=url, use_desktop=use_desktop, use_mobile=use_mobile,
                         email=email, passwd=passwd, keyword_list=keyword_list)
         self.logger.debug(f'Notification init: {attrs}')
-
 
     def run(self):
         try:
@@ -271,7 +307,14 @@ class Notification(QThread):
             if self.setup():
                 self.logger.info('알림 시작')
                 self.done.emit(True)
-                asyncio.run(self.websocket_event_listener())
+                result = True
+                while self.flag:
+                    if self.check_event():
+                        result = self.new_article_action()
+                    elif not result:
+                        self.logger.info('실패한 이벤트 처리 재시도')
+                        result = self.new_article_action()
+                    time.sleep(3)
             else:
                 return
         except Exception as e:
@@ -283,7 +326,7 @@ class Notification(QThread):
 
     def setup(self):
         # 채널 주소에서 채널 ID를 파싱하는 정규표현식 매칭
-        self.url_parser = re.match(r"^http[s]?://arca[.]live(?P<location>/b/(?P<channel_id>[a-z\d]+)/?($|[?].*))", self.url)
+        self.url_parser = re.match(r"^http[s]?://arca[.]live(?P<location>/b/(?P<channel_id>[a-z0-9]+)/?($|[?].*))", self.url)
         if not self.url_parser:
             # 매칭이 되지 않으면 오류 메시지 출력 및 예외 처리
             self.logger.critical('채널 주소가 잘못되었습니다.')
@@ -299,14 +342,14 @@ class Notification(QThread):
 
         # 받아온 html에서 게시글 주소만 파싱
         try:
-            l = soup.find("div", class_="list-table").find_all('a', class_='vrow')
+            new_post = soup.find("div", class_="list-table").find_all('a', class_='vrow')
         except AttributeError:
             self.logger.critical('웹 페이지 파싱에 실패했습니다.')
             self.error.emit('웹 페이지 파싱에 실패했습니다.')
             return False
 
         # 채널 주소에서 origin을 제외한 location 추출
-        self.location = self.url_parser.group('location')
+        location = self.url_parser.group('location')
         # 체널 주소에서 채널 ID만 추출
         self.channel_id = self.url_parser.group('channel_id')
         # 게시글 주소에서 글 번호만 추출하는 정규표현식 정의
@@ -314,7 +357,7 @@ class Notification(QThread):
 
         # recent 변수에 현재 최신 글 번호를 저장
         self.recent = 0
-        for n in l:
+        for n in new_post:
             # 공지 게시글 제외
             if 'notice' in n.attrs['class']:
                 continue
@@ -326,56 +369,13 @@ class Notification(QThread):
                 self.recent = int(s_post_id.group('post_id'))
                 break
 
+        self.last_check = self.recent
         self.logger.info(f'최신 글 번호 추출 성공: {self.recent}')
+        self.event_listener = WebSocketEventListener(location)
+        self.event_listener.send_event.connect(self.receive_event)
+        self.finished.connect(self.event_listener.stop)
+        self.event_listener.start()
         return True
-
-    async def websocket_event_listener(self):
-        result = True
-        last_try_time = 0
-        backoff_interval = 3
-        while self.flag:
-            try:
-                async with websockets.connect('wss://arca.live/arcalive',
-                                                subprotocols=['arcalive'],
-                                                origin='https://arca.live',
-                                                extra_headers=get_scraper().headers) as websocket:
-                    try:
-                        self.logger.info('웹소켓 연결 성공')
-                        await websocket.send('hello')
-                        await websocket.send(f'c|{self.location}')
-                        while self.flag:
-                            try:
-                                message = await asyncio.wait_for(websocket.recv(), timeout=1)
-                                if message == 'na':
-                                    backoff_interval = 3
-                                    self.logger.info('새글 이벤트 감지')
-                                    n_alarm = max(get_n_alarm() - 1, 0)
-                                    await asyncio.sleep(random.random() * n_alarm + 1)
-                                    last_try_time = time.perf_counter()
-                                    result = self.new_article_action()
-                                if not result and time.perf_counter() - last_try_time > backoff_interval:
-                                    backoff_interval = min(backoff_interval ** 1.5, 60)
-                                    self.logger.info('지수 백오프로 실패한 이벤트 처리 재시도')
-                                    last_try_time = time.perf_counter()
-                                    result = self.new_article_action()
-                            except asyncio.TimeoutError:
-                                pass
-                    except (websockets.ConnectionClosed, RuntimeError) as e:
-                        self.logger.warning('웹소켓 연결이 종료되었습니다.', exc_info=e)
-            except (websockets.WebSocketException, asyncio.TimeoutError, OSError) as e:
-                self.logger.warning('웹소켓 연결에 실패했습니다.', exc_info=e)
-            finally:
-                if self.flag:
-                    remainder = backoff_interval
-                    while remainder > 0:
-                        await asyncio.sleep(min(remainder, 1))
-                        remainder -= 1
-                        if not self.flag:
-                            return
-                    backoff_interval = min(backoff_interval ** 1.5, 60)
-                    self.logger.info('지수 백오프로 웹소켓 연결 재시도 및 누락된 이벤트 탐색')
-                    last_try_time = time.perf_counter()
-                    result = self.new_article_action()
 
     def new_article_action(self):
         html = get_html(self.url)
@@ -383,17 +383,16 @@ class Notification(QThread):
             self.logger.error('웹 페이지를 불러오지 못했습니다.', exc_info=html)
             return False
         soup = BeautifulSoup(html, 'html.parser')
-        new_post = soup.find("div", class_="list-table")
 
         # 게시글 주소
         try:
-            new_link = new_post.find_all('a', class_='vrow')
+            new_post = soup.find("div", class_="list-table").find_all('a', class_='vrow')
         except AttributeError:
             self.logger.error('웹 페이지 파싱에 실패했습니다.')
             return False
 
         # 새로 가져온 리스트의 글 번호들을 비교
-        for n in reversed(new_link):
+        for n in reversed(new_post):
             if not self.flag:
                 break
             # 공지 게시글 제외
@@ -421,10 +420,12 @@ class Notification(QThread):
                 header = [hd.text.strip() for hd in header]
 
                 header_f = ' '.join([f'[{hd}]' for hd in header if hd != ''])
-                title_f = f'{header_f} {title}'.strip()
+                title_f = f'{header_f} {title}'.strip().replace('\n', '\t')
 
-                self.logger.info(f'새글 파싱 성공: {post_id}')
-                self.logger.debug(f'new article data: {dict(title=title_f, author=author)}')
+                if post_id > self.last_check:
+                    self.last_check = post_id
+                    self.logger.info(f'새글 파싱 성공: {post_id}')
+                    self.logger.debug(f'new article data: {dict(title=title_f, author=author)}')
 
                 # 키워드=off 일 경우, 바로 토스트 메시지로 표시
                 if self.keyword_list is None:
@@ -435,6 +436,9 @@ class Notification(QThread):
                 else:
                     for keyword in self.keyword_list:
                         if keyword in title_f:
+                            if post_id < self.last_check:
+                                self.logger.info(f'변경글 파싱 성공: {post_id}')
+                                self.logger.debug(f'updated article data: {dict(title=title_f, author=author)}')
                             self.logger.debug('키워드 매칭 성공')
                             self.notification_action(title_f, author, post_id)
                             self.recent = post_id
@@ -457,6 +461,14 @@ class Notification(QThread):
                 self.logger.info(f'이메일 알림 전송 성공')
             else:
                 self.logger.error('이메일 알림 전송에 실패했습니다.', exc_info=e)
+
+    def check_event(self):
+        event_flag = self.event_flag
+        self.event_flag = False
+        return event_flag
+
+    def receive_event(self):
+        self.event_flag = True
 
     def stop(self):
         self.flag = False

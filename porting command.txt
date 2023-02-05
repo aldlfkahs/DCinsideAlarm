@@ -1,4 +1,4 @@
-# 32비트 플랫폼으로 변경
+﻿# 32비트 플랫폼으로 변경
 conda config --env --set subdir win-32
 # 환경 설치 및 파이썬, pip 설치
 conda create -p .\py38 python=3.8.8 pip=21.0.1
@@ -23,6 +23,6 @@ pip install -r requirements.txt
 # 설치된 패키지들 목록과 버전 확인
 pip list
 # exe파일 포팅
-pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="arca_image.ico;." --name="아카라이브 새글 알리미.exe" main.py
+pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="아카라이브 새글 알리미.exe" main.py
 # 가상환경 비활성화
 conda deactivate
