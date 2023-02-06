@@ -326,7 +326,7 @@ class Notification(QThread):
 
     def setup(self):
         # 채널 주소에서 채널 ID를 파싱하는 정규표현식 매칭
-        self.url_parser = re.match(r"^http[s]?://arca[.]live(?P<location>/b/(?P<channel_id>[a-z0-9]+)/?($|[?].*))", self.url)
+        self.url_parser = re.match(r"^http[s]?://arca[.]live(?P<location>/b/(?P<channel_id>[a-z0-9]+)(|/[0-9]+)/?($|[?].*))", self.url)
         if not self.url_parser:
             # 매칭이 되지 않으면 오류 메시지 출력 및 예외 처리
             self.logger.critical('채널 주소가 잘못되었습니다.')
