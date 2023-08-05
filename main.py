@@ -98,7 +98,7 @@ class get_default_config(object):
         if not hasattr(cls, 'instance'):
             default_config = dict()
             default_config['config_name'] = 'default'
-            default_config['channel_url'] = 'https://arca.live/b/commission'
+            default_config['channel_url'] = 'https://arca.live/b/breaking'
             default_config['use_filtering'] = False
             default_config['keyword_list'] = []
             default_config['notify_type'] = {'Desktop': True, 'Mobile': False}
