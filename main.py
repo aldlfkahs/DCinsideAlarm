@@ -345,7 +345,7 @@ class Notification(QThread):
                     self.logger.debug('키워드 비활성화 상태')
                     self.notification_action(title_f, author, post_id)
                     self.recent = post_id
-                # 키워드=on 일 경우, 체크된 기준(제목 혹은 글쓴이)에 키워드가 포함 되어있다면 토스트 메시지로 표시
+                # 키워드=on 일 경우, 체크된 기준(제목 혹은 작성자)에 키워드가 포함 되어있다면 토스트 메시지로 표시
                 else:
                     for keyword in self.keyword_list:
                         if (ex.k_titleCB.isChecked() and keyword in title_f) or (ex.k_authorCB.isChecked() and keyword in author):
@@ -413,10 +413,10 @@ class MyApp(QWidget):
         self.k_onRB.clicked.connect(self.updateOptionState)
         self.k_offRB.clicked.connect(self.updateOptionState)
 
-        # 키워드 제목/글쓴이 선택 버튼
+        # 키워드 제목/작성자 선택 버튼
         self.isTitleLb = QLabel('기준')
         self.k_titleCB = QCheckBox('제목', self)
-        self.k_authorCB = QCheckBox('글쓴이', self)
+        self.k_authorCB = QCheckBox('작성자', self)
 
         # 추가할 키워드 적는 칸
         self.newItemLE = QLineEdit('', self)
