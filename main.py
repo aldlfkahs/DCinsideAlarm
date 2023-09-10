@@ -51,7 +51,7 @@ import smtplib
 import cerberus
 from email.message import EmailMessage
 
-version = '1.7.0'
+version = '1.8.0'
 
 class get_default_logger(object):
     def __new__(cls):
@@ -76,6 +76,7 @@ class get_validator(object):
                 'config_name': {'type': 'string'},
                 'gallery_url': {'type': 'string'},
                 'use_filtering': {'type': 'boolean'},
+                'filtering_type': {'type': 'dict', 'schema': {'Title': {'type': 'boolean'}, 'Author': {'type': 'boolean'}}},
                 'keyword_list': {'type': 'list', 'schema': {'type': 'string'}},
                 'notify_type': {'type': 'dict', 'schema': {'Desktop': {'type': 'boolean'}, 'Mobile': {'type': 'boolean'}}},
                 'email': {'type': 'string'},
@@ -89,8 +90,9 @@ class get_default_config(object):
         if not hasattr(cls, 'instance'):
             default_config = dict()
             default_config['config_name'] = 'default'
-            default_config['gallery_url'] = 'https://gall.dcinside.com/mgallery/board/lists?id=singlebungle1472'
+            default_config['gallery_url'] = 'https://gall.dcinside.com/mgallery/board/lists?id=aoegame'
             default_config['use_filtering'] = False
+            default_config['filtering_type'] = {'Title': True, 'Author': False}
             default_config['keyword_list'] = []
             default_config['notify_type'] = {'Desktop': True, 'Mobile': False}
             default_config['email'] = ''
@@ -343,10 +345,10 @@ class Notification(QThread):
                     self.logger.debug('키워드 비활성화 상태')
                     self.notification_action(title_f, author, post_id)
                     self.recent = post_id
-                # 키워드=on 일 경우, 제목에 키워드가 포함 되어있다면 토스트 메시지로 표시
+                # 키워드=on 일 경우, 체크된 기준(제목 혹은 글쓴이)에 키워드가 포함 되어있다면 토스트 메시지로 표시
                 else:
                     for keyword in self.keyword_list:
-                        if keyword in title_f:
+                        if (ex.k_titleCB.isChecked() and keyword in title_f) or (ex.k_authorCB.isChecked() and keyword in author):
                             if post_id < self.last_check:
                                 self.logger.info(f'변경글 파싱 성공: {post_id}')
                                 self.logger.debug(f'updated article data: {dict(title=title_f, author=author)}')
@@ -398,16 +400,23 @@ class MyApp(QWidget):
         # 시작/중지 버튼
         self.startBtn = QPushButton('시작', self)
         self.startBtn.clicked.connect(self.startNotification)
-
-        self.keywordLb = QLabel('키워드')
-        self.keywordLW = QListWidget(self)
+        self.startBtn.clicked.connect(self.updateKeywordGroupState)
 
         # 키워드 온/오프 버튼
+        self.keywordLb = QLabel('키워드')
+        self.keywordLW = QListWidget(self)
         self.k_onRB = QRadioButton('ON', self)
         self.k_offRB = QRadioButton('OFF', self)
         self.k_group = QButtonGroup(self)
         self.k_group.addButton(self.k_onRB)
         self.k_group.addButton(self.k_offRB)
+        self.k_onRB.clicked.connect(self.updateOptionState)
+        self.k_offRB.clicked.connect(self.updateOptionState)
+
+        # 키워드 제목/글쓴이 선택 버튼
+        self.isTitleLb = QLabel('기준')
+        self.k_titleCB = QCheckBox('제목', self)
+        self.k_authorCB = QCheckBox('글쓴이', self)
 
         # 추가할 키워드 적는 칸
         self.newItemLE = QLineEdit('', self)
@@ -426,18 +435,21 @@ class MyApp(QWidget):
 
         # 위에서 선언한 위젯들의 위치를 지정
         grid.addWidget(self.urlLb, 0, 0)
-        grid.addWidget(self.m_versionLb, 0, 4)
-        grid.addWidget(self.urlLE, 1, 0, 1, 5)
-        grid.addWidget(self.startBtn, 2, 0, 1, 5)
+        grid.addWidget(self.m_versionLb, 0, 6)
+        grid.addWidget(self.urlLE, 1, 0, 1, 7)
+        grid.addWidget(self.startBtn, 2, 0, 1, 7)
         grid.addWidget(self.keywordLb, 3, 0)
         grid.addWidget(self.k_onRB, 3, 1)
         grid.addWidget(self.k_offRB, 3, 2)
-        grid.addWidget(self.newItemLE, 3, 3)
-        grid.addWidget(self.keywordLW, 4, 0, 4, 4)
-        grid.addWidget(self.k_appendBtn, 4, 4)
-        grid.addWidget(self.k_removeBtn, 5, 4)
-        grid.addWidget(self.saveCrntBtn, 6, 4)
-        grid.addWidget(self.settingBtn, 7, 4)
+        grid.addWidget(self.isTitleLb, 3, 4)
+        grid.addWidget(self.k_titleCB, 3, 5)
+        grid.addWidget(self.k_authorCB, 3, 6)
+        grid.addWidget(self.newItemLE, 4, 0, 1, 6)
+        grid.addWidget(self.keywordLW, 5, 0, 3, 6)
+        grid.addWidget(self.k_appendBtn, 4, 6)
+        grid.addWidget(self.k_removeBtn, 5, 6)
+        grid.addWidget(self.saveCrntBtn, 6, 6)
+        grid.addWidget(self.settingBtn, 7, 6)
 
         return widget
 
@@ -531,10 +543,13 @@ class MyApp(QWidget):
     def get_config(self):
         use_desktop = self.nt_desktopRB.isChecked() or self.nt_bothRB.isChecked()
         use_mobile = self.nt_mobileRB.isChecked() or self.nt_bothRB.isChecked()
+        keyword_opt_title = self.k_titleCB.isChecked()
+        keyword_opt_author = self.k_authorCB.isChecked()
         current_config = dict()
         current_config['config_name'] = self.config_name
         current_config['gallery_url'] = self.urlLE.text()
         current_config['use_filtering'] = self.k_onRB.isChecked()
+        current_config['filtering_type'] = {'Title': keyword_opt_title, 'Author': keyword_opt_author}
         current_config['keyword_list'] = [self.keywordLW.item(i).text() for i in range(self.keywordLW.count())]
         current_config['notify_type'] = {'Desktop': use_desktop, 'Mobile': use_mobile}
         current_config['email'] = self.emailLE.text()
@@ -548,9 +563,17 @@ class MyApp(QWidget):
         self.keywordLW.addItems(init_config['keyword_list'])
         if init_config['use_filtering']:
             self.k_onRB.setChecked(True)
+            self.k_titleCB.setEnabled(True)
+            self.k_authorCB.setEnabled(True)
         else:
             self.k_offRB.setChecked(True)
+            self.k_titleCB.setEnabled(False)
+            self.k_authorCB.setEnabled(False)
         self.newItemLE.clear()
+        if init_config['filtering_type']['Title']:
+            self.k_titleCB.setChecked(True)
+        if init_config['filtering_type']['Author']:
+            self.k_authorCB.setChecked(True)
         if init_config['notify_type']['Mobile']:
             if init_config['notify_type']['Desktop']:
                 self.nt_bothRB.setChecked(True)
@@ -597,6 +620,26 @@ class MyApp(QWidget):
             self.thread.done.connect(self.done)
             self.stop.connect(self.thread.stop)
             self.thread.start()
+
+    def updateKeywordGroupState(self):
+        if self.startBtn.text() == '중지':
+            for button in self.k_group.buttons():
+                button.setEnabled(True)
+            self.k_titleCB.setEnabled(True)
+            self.k_authorCB.setEnabled(True)
+        else:
+            for button in self.k_group.buttons():
+                button.setEnabled(False)
+            self.k_titleCB.setEnabled(False)
+            self.k_authorCB.setEnabled(False)
+
+    def updateOptionState(self):
+        if self.k_onRB.isChecked():
+            self.k_titleCB.setEnabled(True)
+            self.k_authorCB.setEnabled(True)
+        else:
+            self.k_titleCB.setEnabled(False)
+            self.k_authorCB.setEnabled(False)
 
     # 키워드 추가 버튼
     def k_append(self):

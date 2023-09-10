@@ -1,0 +1,6 @@
+.exe
+build/
+py*/
+.idea/
+Notification.log
+config.yaml
