@@ -25,6 +25,7 @@
       https://malja.github.io/zroya/index.html
       https://pypi.org/project/cloudscraper/
       https://websockets.readthedocs.io/en/stable/index.html
+      https://github.com/APSODE/revived-witch-notice-bot/blob/main/ArcaLive.py
 '''
 '''
 사용 전 필수 설정사항
@@ -57,7 +58,7 @@ import smtplib
 import cerberus
 from email.message import EmailMessage
 
-version = '1.8.3'
+version = '1.8.4'
 
 class get_default_logger(object):
     def __new__(cls):
@@ -85,7 +86,9 @@ class get_validator(object):
                 'keyword_list': {'type': 'list', 'schema': {'type': 'string'}},
                 'notify_type': {'type': 'dict', 'schema': {'Desktop': {'type': 'boolean'}, 'Mobile': {'type': 'boolean'}}},
                 'email': {'type': 'string'},
-                'passwd': {'type': 'string'}
+                'passwd': {'type': 'string'},
+                'arcaid': {'type': 'string'},
+                'arcapasswd': {'type': 'string'}
             }
             cls.instance = cerberus.Validator(schema, require_all=True)
         return cls.instance
@@ -95,12 +98,14 @@ class get_default_config(object):
         if not hasattr(cls, 'instance'):
             default_config = dict()
             default_config['config_name'] = 'default'
-            default_config['channel_url'] = 'https://arca.live/b/singbung'
+            default_config['channel_url'] = 'https://arca.live/b/breaking'
             default_config['use_filtering'] = False
             default_config['keyword_list'] = []
             default_config['notify_type'] = {'Desktop': True, 'Mobile': False}
             default_config['email'] = ''
             default_config['passwd'] = ''
+            default_config['arcaid'] = ''
+            default_config['arcapasswd'] = ''
             cls.instance = default_config
         return cls.instance
 
@@ -130,14 +135,16 @@ class get_session(object):
         return cls.instance
 
 # url로 요청을 보내는 함수
-def get_html(url):
+def get_html(url, session, bot_account: dict = None):
     try:
-        resp = get_session().get(url, timeout=5)
+        resp = session.get(url, timeout=5)
     except requests.exceptions.RequestException as e:
         return e
     except cloudscraper.exceptions.CloudflareException as e1:
         try:
-            get_session.create_new()
+            session.create_new()
+            Login(session, bot_account)
+            get_default_logger().warning('HTTP 세션을 초기화됨')
         except (requests.exceptions.RequestException,
                 cloudscraper.exceptions.CloudflareException) as e2:
             get_default_logger().warning('HTTP 세션을 초기화하지 못했습니다.', exc_info=e2)
@@ -281,12 +288,37 @@ class WebSocketEventListener(QThread):
     def stop(self):
         self.flag = False
 
+# 로그인 전송 데이터 생성
+def CreateLoginPayloadData(session, url, bot_account: dict = None) -> dict:
+    html = BeautifulSoup(get_html(url, session, bot_account), "html.parser")
+    csrf = html.find("input", {"name": "_csrf"}).attrs.get("value")
+    goto = html.find("input", {"name": "goto"}).attrs.get("value")
+    login_payload = {
+        "username": bot_account.get("ID"),
+        "password": bot_account.get("PW"),
+        "_csrf": csrf,
+        "goto": goto
+    }
+    return login_payload
+
+#로그인 하는 함수
+def Login(session, bot_account):
+    LOGIN_URL = "https://arca.live/u/login"
+    LOGIN_RQ_RESPONSE = session.post(LOGIN_URL, data = CreateLoginPayloadData(session, LOGIN_URL, bot_account))
+    if LOGIN_RQ_RESPONSE.status_code == 200:
+        get_default_logger().info("로그인에 성공하였습니다.")
+        return True
+    else:
+        get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_RQ_RESPONSE.status_code}")
+        return False
+    
+
 class Notification(QThread):
 
     error = pyqtSignal(str)
     done = pyqtSignal(bool)
 
-    def __init__(self, url, use_desktop, use_mobile, email, passwd, keyword_list, parent=None):
+    def __init__(self, url, use_desktop, use_mobile, email, passwd, keyword_list, session, bot_account, parent=None):
         super().__init__(parent)
         self.url = url
         self.use_desktop = use_desktop
@@ -294,9 +326,12 @@ class Notification(QThread):
         self.email = email
         self.passwd = passwd
         self.keyword_list = keyword_list
+        self.session = session
+        self.bot_account = bot_account
         self.logger = get_default_logger()
         self.event_flag = False
         self.flag = True
+
         attrs = dict(url=url, use_desktop=use_desktop, use_mobile=use_mobile,
                         email=email, passwd=passwd, keyword_list=keyword_list)
         self.logger.debug(f'Notification init: {attrs}')
@@ -333,7 +368,7 @@ class Notification(QThread):
             self.error.emit('채널 주소가 잘못되었습니다.')
             return False
 
-        html = get_html(self.url)
+        html = get_html(self.url, self.session, self.bot_account)
         if not isinstance(html, str):
             self.logger.critical('웹 페이지를 불러오지 못했습니다.', exc_info=html)
             self.error.emit('웹 페이지를 불러오지 못했습니다.')
@@ -378,7 +413,8 @@ class Notification(QThread):
         return True
 
     def new_article_action(self):
-        html = get_html(self.url)
+        self.logger.info(f'새글 파싱 시도')
+        html = get_html(self.url, self.session, self.bot_account)
         if not isinstance(html, str):
             self.logger.error('웹 페이지를 불러오지 못했습니다.', exc_info=html)
             return False
@@ -558,6 +594,13 @@ class MyApp(QWidget):
         self.nt_group.addButton(self.nt_mobileRB)
         self.nt_group.addButton(self.nt_bothRB)
 
+        self.arcaidLb = QLabel('아이디')
+        self.arcapasswdLb = QLabel('비밀번호')
+
+        self.arcaidLE = QLineEdit('', self)
+        self.arcapasswdLE = QLineEdit('', self)
+        self.arcapasswdLE.setEchoMode(QLineEdit.Password)
+
         self.emailLb = QLabel('이메일')
         self.passwdLb = QLabel('비밀번호')
 
@@ -590,10 +633,14 @@ class MyApp(QWidget):
         grid.addWidget(self.nt_desktopRB, 1, 1)
         grid.addWidget(self.nt_mobileRB, 1, 2)
         grid.addWidget(self.nt_bothRB, 1, 3)
-        grid.addWidget(self.emailLb, 2, 0)
-        grid.addWidget(self.emailLE, 2, 1, 1, 4)
-        grid.addWidget(self.passwdLb, 3, 0)
-        grid.addWidget(self.passwdLE, 3, 1, 1, 4)
+        grid.addWidget(self.arcaidLb, 2, 0)
+        grid.addWidget(self.arcaidLE, 2, 1, 1, 1)
+        grid.addWidget(self.arcapasswdLb, 3, 0)
+        grid.addWidget(self.arcapasswdLE, 3, 1, 1, 1)
+        grid.addWidget(self.emailLb, 2, 2)
+        grid.addWidget(self.emailLE, 2, 3, 1, 2)
+        grid.addWidget(self.passwdLb, 3, 2)
+        grid.addWidget(self.passwdLE, 3, 3, 1, 2)
         grid.addWidget(self.configLW, 4, 0, 4, 4)
         grid.addWidget(self.saveBtn, 4, 4)
         grid.addWidget(self.loadBtn, 5, 4)
@@ -636,6 +683,8 @@ class MyApp(QWidget):
         current_config['notify_type'] = {'Desktop': use_desktop, 'Mobile': use_mobile}
         current_config['email'] = self.emailLE.text()
         current_config['passwd'] = self.passwdLE.text()
+        current_config['arcaid'] = self.arcaidLE.text()
+        current_config['arcapasswd'] = self.arcapasswdLE.text()
         return current_config
 
     def set_config(self, init_config):
@@ -657,6 +706,8 @@ class MyApp(QWidget):
             self.nt_desktopRB.setChecked(True)
         self.emailLE.setText(init_config['email'])
         self.passwdLE.setText(init_config['passwd'])
+        self.arcaidLE.setText(init_config['arcaid'])
+        self.arcapasswdLE.setText(init_config['arcapasswd'])
 
     def center(self):
         qr = self.frameGeometry()
@@ -685,11 +736,20 @@ class MyApp(QWidget):
             use_desktop = self.nt_desktopRB.isChecked() or self.nt_bothRB.isChecked()
             use_mobile = self.nt_mobileRB.isChecked() or self.nt_bothRB.isChecked()
             email, passwd = self.emailLE.text(), self.passwdLE.text()
+            session = get_session.create_new() # 세션 초기화
+            bot_account = {
+                "ID": self.arcaidLE.text(),
+                "PW": self.arcapasswdLE.text()
+            }
+            
             if self.k_onRB.isChecked():
                 keyword_list = [self.keywordLW.item(i).text() for i in range(self.keywordLW.count())]
             else:
                 keyword_list = None
-            self.thread = Notification(channel_url, use_desktop, use_mobile, email, passwd, keyword_list, parent=self)
+            login=Login(session, bot_account)
+            if not login:
+                QMessageBox.warning(self, "로그인 실패", "로그인에 실패했습니다.\n비로그인상태에서는 성인전용 게시판의 알림이 오지 않습니다.")
+            self.thread = Notification(channel_url, use_desktop, use_mobile, email, passwd, keyword_list, session, bot_account, parent=self)
             self.thread.error.connect(self.error)
             self.thread.done.connect(self.done)
             self.stop.connect(self.thread.stop)
