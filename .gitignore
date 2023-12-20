@@ -1,0 +1,8 @@
+.exe
+build/
+py*/
+.idea/
+Notification.log
+config.yaml
+.py38
+*.spec
