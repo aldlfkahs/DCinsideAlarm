@@ -303,15 +303,42 @@ def CreateLoginPayloadData(session, url, bot_account: dict = None) -> dict:
     }
     return login_payload
 
+def Create2FAPayloadData(session, url, code_value) -> dict:
+    html = BeautifulSoup(get_html(url, session, bot_account), "html.parser")
+    csrf = html.find("input", {"name": "_csrf"}).attrs.get("value")
+    login_payload = {
+        "code_value": code_value,
+        "from":"login",
+        "_csrf": csrf
+    }
+    return login_payload
+
 #로그인 하는 함수
 def Login(session, bot_account):
     LOGIN_URL = "https://arca.live/u/login"
     LOGIN_RQ_RESPONSE = session.post(LOGIN_URL, data = CreateLoginPayloadData(session, LOGIN_URL, bot_account))
     if LOGIN_RQ_RESPONSE.status_code == 200:
+        get_default_logger().info("로그인에 성공하였습니다. Capcha를 패스했습니다.")
+        return (True, True)
+    elif LOGIN_RQ_RESPONSE.status_code == 302:
+        get_default_logger().info("로그인에 성공하였습니다. Capcha가 필요합니다")
+        return (True, False)
+    else:
+        get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_RQ_RESPONSE.status_code}")
+        return (False, False)
+
+def Login2FA(session, code_value):
+    #이메일 인증 사용 예정   
+    LOGIN_2FA_URL = "https://arca.live/u/login/2fa?from=login&type=email"
+    LOGIN_2FA_RECIEVE_URL = "https://arca.live/u/login/2fa/verify_email_code"
+    LOGIN_2FA_RQ_RESPONSE = session.post(LOGIN_2FA_RECIEVE_URL, data = Create2FAPayloadData(session, LOGIN_2FA_URL, code_value))
+    
+    #TODO: JSON 파싱
+    if LOGIN_2FA_RQ_RESPONSE.status_code == 200:
         get_default_logger().info("로그인에 성공하였습니다.")
         return True
     else:
-        get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_RQ_RESPONSE.status_code}")
+        get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_2FA_RQ_RESPONSE.status_code}")
         return False
     
 
@@ -770,7 +797,10 @@ class MyApp(QWidget):
                 keyword_list = [self.keywordLW.item(i).text() for i in range(self.keywordLW.count())]
             else:
                 keyword_list = None
-            login=Login(session, bot_account)
+            (login,capcha_pass)=Login(session, bot_account)
+            if not capcha_pass:
+                code_value="0000"#TODO: 코드값 받아오는 루틴 작성
+                login=Login2FA(session, code_value)
             if not login:
                 QMessageBox.warning(self, "로그인 실패", "로그인에 실패했습니다.\n비로그인상태에서는 성인전용 게시판의 알림이 오지 않습니다.")
             self.thread = Notification(channel_url, use_desktop, use_mobile, email, passwd, keyword_list, session, bot_account, parent=self)
