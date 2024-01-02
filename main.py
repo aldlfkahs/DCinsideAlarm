@@ -333,35 +333,38 @@ def Login(session, bot_account):
         EC.presence_of_element_located((By.ID,'idPassword')) and 
         EC.presence_of_element_located((By.ID,'submitBtn')) 
     )
-    driver.find_element(By.ID,'idInput').send_keys(bot_account.get("ID"))
-    time.sleep(2)
-    driver.find_element(By.ID,'submitBtn').click()
-    # time.sleep(1)
-    driver.find_element(By.ID,'idPassword').send_keys(bot_account.get("PW"))
-    time.sleep(2)
-    driver.find_element(By.ID,'submitBtn').click()
-    
     try:
-        loginSuccess=False
-        WebDriverWait(driver, 120).until(
-            EC.url_to_be("https://arca.live/")
-        )
-        try:
-            capcha_test=driver.find_elements(By.ID, "myElementId")#봇캡챠 id 넣을것
-            WebDriverWait(driver, 120).until(
-                EC.staleness_of((By.ID, "myElementId"))#봇캡챠
-            )
+        driver.find_element(By.ID,'idInput').send_keys(bot_account.get("ID"))
+        time.sleep(2)
+        driver.find_element(By.ID,'submitBtn').click()
+        time.sleep(1)
+        driver.find_element(By.ID,'idPassword').send_keys(bot_account.get("PW"))
+        time.sleep(2)
+        driver.find_element(By.ID,'submitBtn').click()
+    finally:
             
-        for cookie in driver.get_cookies():
-            c = {cookie['name'] : cookie['value']}
-            print(c)
-            session.cookies.update(c)
-            if cookie['name']=='campaign.session':
-                loginSuccess=True
-        driver.quit()
-        return loginSuccess
-    except Exception as e:
-        return False
+        try:
+            loginSuccess=False
+            WebDriverWait(driver, 120).until(
+                EC.url_to_be("https://arca.live/")
+            )
+            try:
+                capcha_test=driver.find_elements(By.ID, "myElementId")#봇캡챠 id 넣을것
+                WebDriverWait(driver, 120).until(
+                    EC.staleness_of((By.ID, "myElementId"))#봇캡챠
+                )
+            finally:
+                time.sleep(2)
+                for cookie in driver.get_cookies():
+                    c = {cookie['name'] : cookie['value']}
+                    print(c)
+                    session.cookies.update(c)
+                    if cookie['name']=='campaign.session':
+                        loginSuccess=True
+                driver.quit()
+                return loginSuccess
+        except Exception as e:
+            return False
 
 
 class Notification(QThread):
