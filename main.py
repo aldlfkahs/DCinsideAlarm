@@ -26,6 +26,7 @@
       https://pypi.org/project/cloudscraper/
       https://websockets.readthedocs.io/en/stable/index.html
       https://github.com/APSODE/revived-witch-notice-bot/blob/main/ArcaLive.py
+      https://m.blog.naver.com/draco6/221664143794
 '''
 '''
 사용 전 필수 설정사항
@@ -57,6 +58,11 @@ import yaml
 import smtplib
 import cerberus
 from email.message import EmailMessage
+import selenium
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 version = '1.9.0'
 
@@ -290,57 +296,73 @@ class WebSocketEventListener(QThread):
     def stop(self):
         self.flag = False
 
-# 로그인 전송 데이터 생성
-def CreateLoginPayloadData(session, url, bot_account: dict = None) -> dict:
-    html = BeautifulSoup(get_html(url, session, bot_account), "html.parser")
-    csrf = html.find("input", {"name": "_csrf"}).attrs.get("value")
-    goto = html.find("input", {"name": "goto"}).attrs.get("value")
-    login_payload = {
-        "username": bot_account.get("ID"),
-        "password": bot_account.get("PW"),
-        "_csrf": csrf,
-        "goto": goto
-    }
-    return login_payload
 
-def Create2FAPayloadData(session, url, code_value) -> dict:
-    html = BeautifulSoup(get_html(url, session, bot_account), "html.parser")
-    csrf = html.find("input", {"name": "_csrf"}).attrs.get("value")
-    login_payload = {
-        "code_value": code_value,
-        "from":"login",
-        "_csrf": csrf
-    }
-    return login_payload
+#캡챠로 인해 사용하기 어려워진 구 로그인함수
+# 로그인 전송 데이터 생성
+# def CreateLoginPayloadData(session, url, bot_account: dict = None) -> dict:
+    # html = BeautifulSoup(get_html(url, session, bot_account), "html.parser")
+    # csrf = html.find("input", {"name": "_csrf"}).attrs.get("value")
+    # goto = html.find("input", {"name": "goto"}).attrs.get("value")
+    # login_payload = {
+        # "username": bot_account.get("ID"),
+        # "password": bot_account.get("PW"),
+        # "_csrf": csrf,
+        # "goto": goto
+    # }
+    # return login_payload
 
 #로그인 하는 함수
+# def Login(session, bot_account):
+    # LOGIN_URL = "https://arca.live/u/login"
+    # LOGIN_RQ_RESPONSE = session.post(LOGIN_URL, data = CreateLoginPayloadData(session, LOGIN_URL, bot_account))
+    # if LOGIN_RQ_RESPONSE.status_code == 200:
+        # get_default_logger().info("로그인에 성공하였습니다.")
+        # return True
+    # else:
+        # get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_RQ_RESPONSE.status_code}")
+        # return False
+        
+#크로미움 사용하는 새 로그인함수
 def Login(session, bot_account):
-    LOGIN_URL = "https://arca.live/u/login"
-    LOGIN_RQ_RESPONSE = session.post(LOGIN_URL, data = CreateLoginPayloadData(session, LOGIN_URL, bot_account))
-    if LOGIN_RQ_RESPONSE.status_code == 200:
-        get_default_logger().info("로그인에 성공하였습니다. Capcha를 패스했습니다.")
-        return (True, True)
-    elif LOGIN_RQ_RESPONSE.status_code == 302:
-        get_default_logger().info("로그인에 성공하였습니다. Capcha가 필요합니다")
-        return (True, False)
-    else:
-        get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_RQ_RESPONSE.status_code}")
-        return (False, False)
-
-def Login2FA(session, code_value):
-    #이메일 인증 사용 예정   
-    LOGIN_2FA_URL = "https://arca.live/u/login/2fa?from=login&type=email"
-    LOGIN_2FA_RECIEVE_URL = "https://arca.live/u/login/2fa/verify_email_code"
-    LOGIN_2FA_RQ_RESPONSE = session.post(LOGIN_2FA_RECIEVE_URL, data = Create2FAPayloadData(session, LOGIN_2FA_URL, code_value))
+    driver = webdriver.Chrome() #크롬 사용
+    driver.get("https://arca.live/u/login")
     
-    #TODO: JSON 파싱
-    if LOGIN_2FA_RQ_RESPONSE.status_code == 200:
-        get_default_logger().info("로그인에 성공하였습니다.")
-        return True
-    else:
-        get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_2FA_RQ_RESPONSE.status_code}")
+    #자동 로그인
+    WebDriverWait(driver, 60).until(
+        EC.presence_of_element_located((By.ID,'idInput')) and
+        EC.presence_of_element_located((By.ID,'idPassword')) and 
+        EC.presence_of_element_located((By.ID,'submitBtn')) 
+    )
+    driver.find_element(By.ID,'idInput').send_keys(bot_account.get("ID"))
+    time.sleep(2)
+    driver.find_element(By.ID,'submitBtn').click()
+    # time.sleep(1)
+    driver.find_element(By.ID,'idPassword').send_keys(bot_account.get("PW"))
+    time.sleep(2)
+    driver.find_element(By.ID,'submitBtn').click()
+    
+    try:
+        loginSuccess=False
+        WebDriverWait(driver, 120).until(
+            EC.url_to_be("https://arca.live/")
+        )
+        try:
+            capcha_test=driver.find_elements(By.ID, "myElementId")#봇캡챠 id 넣을것
+            WebDriverWait(driver, 120).until(
+                EC.staleness_of((By.ID, "myElementId"))#봇캡챠
+            )
+            
+        for cookie in driver.get_cookies():
+            c = {cookie['name'] : cookie['value']}
+            print(c)
+            session.cookies.update(c)
+            if cookie['name']=='campaign.session':
+                loginSuccess=True
+        driver.quit()
+        return loginSuccess
+    except Exception as e:
         return False
-    
+
 
 class Notification(QThread):
 
@@ -797,12 +819,11 @@ class MyApp(QWidget):
                 keyword_list = [self.keywordLW.item(i).text() for i in range(self.keywordLW.count())]
             else:
                 keyword_list = None
-            (login,capcha_pass)=Login(session, bot_account)
-            if not capcha_pass:
-                code_value="0000"#TODO: 코드값 받아오는 루틴 작성
-                login=Login2FA(session, code_value)
+            
+            login=Login(session, bot_account)
             if not login:
-                QMessageBox.warning(self, "로그인 실패", "로그인에 실패했습니다.\n비로그인상태에서는 성인전용 게시판의 알림이 오지 않습니다.")
+                QMessageBox.warning(self, "로그인 실패", "로그인에 실패했습니다.\n비로그인상태에서는 성인전용 게시판의 알림이 오지 않습니다.\n\n팁)봇 감지에 걸렸을수도 있습니다. 다른 브라우저 창에서 캡챠를 해결해보세요.")
+            
             self.thread = Notification(channel_url, use_desktop, use_mobile, email, passwd, keyword_list, session, bot_account, parent=self)
             self.thread.error.connect(self.error)
             self.thread.done.connect(self.done)
