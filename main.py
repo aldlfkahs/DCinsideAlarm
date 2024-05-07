@@ -298,60 +298,68 @@ class WebSocketEventListener(QThread):
 
 
 #캡챠로 인해 사용하기 어려워진 구 로그인함수
+#기기인증 화면을 따올려고 해도, beatifulsoup를 이용하면 제대로 이동이 안되는 문제가 있음.
+'''
 # 로그인 전송 데이터 생성
-# def CreateLoginPayloadData(session, url, bot_account: dict = None) -> dict:
-    # html = BeautifulSoup(get_html(url, session, bot_account), "html.parser")
-    # csrf = html.find("input", {"name": "_csrf"}).attrs.get("value")
-    # goto = html.find("input", {"name": "goto"}).attrs.get("value")
-    # login_payload = {
-        # "username": bot_account.get("ID"),
-        # "password": bot_account.get("PW"),
-        # "_csrf": csrf,
-        # "goto": goto
-    # }
-    # return login_payload
+def CreateLoginPayloadData(session, url, bot_account: dict = None) -> dict:
+    html = BeautifulSoup(get_html(url, session, bot_account), "html.parser")
+    csrf = html.find("input", {"name": "_csrf"}).attrs.get("value")
+    goto = html.find("input", {"name": "goto"}).attrs.get("value")
+    login_payload = {
+        "username": bot_account.get("ID"),
+        "password": bot_account.get("PW"),
+        "_csrf": csrf,
+        "goto": goto
+    }
+    return login_payload
 
 #로그인 하는 함수
-# def Login(session, bot_account):
-    # LOGIN_URL = "https://arca.live/u/login"
-    # LOGIN_RQ_RESPONSE = session.post(LOGIN_URL, data = CreateLoginPayloadData(session, LOGIN_URL, bot_account))
-    # if LOGIN_RQ_RESPONSE.status_code == 200:
-        # get_default_logger().info("로그인에 성공하였습니다.")
-        # return True
-    # else:
-        # get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_RQ_RESPONSE.status_code}")
-        # return False
-        
+def Login(session, bot_account):
+    LOGIN_URL = "https://arca.live/u/login"
+    LOGIN_RQ_RESPONSE = session.post(LOGIN_URL, data = CreateLoginPayloadData(session, LOGIN_URL, bot_account))
+    if LOGIN_RQ_RESPONSE.status_code == 200:
+        get_default_logger().info("로그인에 성공하였습니다.")
+        return True
+    else:
+        get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_RQ_RESPONSE.status_code}")
+        return False
+'''
 #크로미움 사용하는 새 로그인함수
+#TODO: exe화 했을때 작동하는지 확인 안함.
 def Login(session, bot_account):
     driver = webdriver.Chrome() #크롬 사용
     driver.get("https://arca.live/u/login")
     
-    #자동 로그인
+    #로그인 화면이 뜰때까지 기다리기
     WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID,'idInput')) and
-        EC.presence_of_element_located((By.ID,'idPassword')) and 
-        EC.presence_of_element_located((By.ID,'submitBtn')) 
+        EC.presence_of_element_located((By.ID,'idPassword')) 
     )
-    try:
-        driver.find_element(By.ID,'idInput').send_keys(bot_account.get("ID"))
+    try: 
+        #TODO: 1. 여기서 유저가 값기입/버튼 클릭을 못하게 할 필요가 있음
+        #      2. 비밀번호 입력후 캡챠를 입력하시오라는 메시지를 띄우기
+        driver.find_element(By.ID,'idInput').send_keys(bot_account.get("ID"))#자동으로 아이디 기입
         time.sleep(2)
-        driver.find_element(By.ID,'submitBtn').click()
+        driver.find_element(By.XPATH,'//*[@id="stage-1"]/div[4]/button').click()#버튼 클릭
         time.sleep(1)
-        driver.find_element(By.ID,'idPassword').send_keys(bot_account.get("PW"))
+        driver.find_element(By.ID,'idPassword').send_keys(bot_account.get("PW"))#자동으로 비밀번호 기입
         time.sleep(2)
-        driver.find_element(By.ID,'submitBtn').click()
+        driver.find_element(By.XPATH,'//*[@id="stage-2"]/div[4]/button').click()#버튼 클릭
     finally:
             
         try:
             loginSuccess=False
             WebDriverWait(driver, 120).until(
-                EC.url_to_be("https://arca.live/")
+                EC.url_to_be("https://arca.live/") or
+                #아카 UI 업데이트 이후 이전기록이 없음 이 페이지로 이동함 
+                EC.url_to_be("https://arca.live/u/null")
             )
             try:
-                capcha_test=driver.find_elements(By.ID, "myElementId")#봇캡챠 id 넣을것
+                #TODO: 봇은 아니십니까? 메시지 창을 검증하는 루틴 필요
+                #html 요소로 판단하게 할려고 했는데 잘 안되는것 같음
+                capcha_test=driver.find_elements(By.ID, "hcaptcha-form")#봇캡챠 id 넣을것
                 WebDriverWait(driver, 120).until(
-                    EC.staleness_of((By.ID, "myElementId"))#봇캡챠
+                    EC.staleness_of((By.ID, "hcaptcha-form"))#봇캡챠
                 )
             finally:
                 time.sleep(2)
