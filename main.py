@@ -64,7 +64,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-version = '1.9.0'
+version = '1.10.0'
 
 class get_default_logger(object):
     def __new__(cls):
@@ -321,8 +321,7 @@ def Login(session, bot_account):
         get_default_logger().info("로그인에 성공하였습니다.")
         return True
     else:
-        get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : %s"
-                                      , LOGIN_RQ_RESPONSE.status_code)
+        get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : {LOGIN_RQ_RESPONSE.status_code}")
         return False
 '''
 #크로미움 사용하는 새 로그인함수
