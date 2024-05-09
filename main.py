@@ -26,6 +26,7 @@
       https://pypi.org/project/cloudscraper/
       https://websockets.readthedocs.io/en/stable/index.html
       https://github.com/APSODE/revived-witch-notice-bot/blob/main/ArcaLive.py
+      https://m.blog.naver.com/draco6/221664143794
 '''
 '''
 사용 전 필수 설정사항
@@ -57,6 +58,11 @@ import yaml
 import smtplib
 import cerberus
 from email.message import EmailMessage
+import selenium
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 version = '1.9.0'
 
@@ -290,6 +296,10 @@ class WebSocketEventListener(QThread):
     def stop(self):
         self.flag = False
 
+
+#캡챠로 인해 사용하기 어려워진 구 로그인함수
+#기기인증 화면을 따올려고 해도, beatifulsoup를 이용하면 제대로 이동이 안되는 문제가 있음.
+'''
 # 로그인 전송 데이터 생성
 def CreateLoginPayloadData(session, url, bot_account: dict = None) -> dict:
     html = BeautifulSoup(get_html(url, session, bot_account), "html.parser")
@@ -314,7 +324,57 @@ def Login(session, bot_account):
         get_default_logger().critical("로그인에 실패하였습니다.\nrequest response current status code : %s"
                                       , LOGIN_RQ_RESPONSE.status_code)
         return False
+'''
+#크로미움 사용하는 새 로그인함수
+#TODO: exe화 했을때 작동하는지 확인 안함.
+def Login(session, bot_account):
+    driver = webdriver.Chrome() #크롬 사용
+    driver.get("https://arca.live/u/login")
     
+    #로그인 화면이 뜰때까지 기다리기
+    WebDriverWait(driver, 60).until(
+        EC.presence_of_element_located((By.ID,'idInput')) and
+        EC.presence_of_element_located((By.ID,'idPassword')) 
+    )
+    try: 
+        #TODO: 1. 여기서 유저가 값기입/버튼 클릭을 못하게 할 필요가 있음
+        #      2. 비밀번호 입력후 캡챠를 입력하시오라는 메시지를 띄우기
+        driver.find_element(By.ID,'idInput').send_keys(bot_account.get("ID"))#자동으로 아이디 기입
+        time.sleep(2)
+        driver.find_element(By.XPATH,'//*[@id="stage-1"]/div[4]/button').click()#버튼 클릭
+        time.sleep(1)
+        driver.find_element(By.ID,'idPassword').send_keys(bot_account.get("PW"))#자동으로 비밀번호 기입
+        time.sleep(2)
+        driver.find_element(By.XPATH,'//*[@id="stage-2"]/div[4]/button').click()#버튼 클릭
+    finally:
+            
+        try:
+            loginSuccess=False
+            WebDriverWait(driver, 120).until(
+                EC.url_to_be("https://arca.live/") or
+                #아카 UI 업데이트 이후 이전기록이 없음 이 페이지로 이동함 
+                EC.url_to_be("https://arca.live/u/null")
+            )
+            try:
+                #TODO: 봇은 아니십니까? 메시지 창을 검증하는 루틴 필요
+                #html 요소로 판단하게 할려고 했는데 잘 안되는것 같음
+                capcha_test=driver.find_elements(By.ID, "hcaptcha-form")#봇캡챠 id 넣을것
+                WebDriverWait(driver, 120).until(
+                    EC.staleness_of((By.ID, "hcaptcha-form"))#봇캡챠
+                )
+            finally:
+                time.sleep(2)
+                for cookie in driver.get_cookies():
+                    c = {cookie['name'] : cookie['value']}
+                    print(c)
+                    session.cookies.update(c)
+                    if cookie['name']=='campaign.session':
+                        loginSuccess=True
+                driver.quit()
+                return loginSuccess
+        except Exception as e:
+            return False
+
 
 class Notification(QThread):
 
@@ -771,9 +831,11 @@ class MyApp(QWidget):
                 keyword_list = [self.keywordLW.item(i).text() for i in range(self.keywordLW.count())]
             else:
                 keyword_list = None
+            
             login=Login(session, bot_account)
             if not login:
-                QMessageBox.warning(self, "로그인 실패", "로그인에 실패했습니다.\n비로그인상태에서는 성인전용 게시판의 알림이 오지 않습니다.")
+                QMessageBox.warning(self, "로그인 실패", "로그인에 실패했습니다.\n비로그인상태에서는 성인전용 게시판의 알림이 오지 않습니다.\n\n팁)봇 감지에 걸렸을수도 있습니다. 다른 브라우저 창에서 캡챠를 해결해보세요.")
+            
             self.thread = Notification(channel_url, use_desktop, use_mobile, email, passwd, keyword_list, session, bot_account, parent=self)
             self.thread.error.connect(self.error)
             self.thread.done.connect(self.done)

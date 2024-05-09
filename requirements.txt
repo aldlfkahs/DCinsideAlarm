@@ -7,3 +7,4 @@ zroya~=0.2.4
 pyyaml~=6.0
 cerberus~=1.3.4
 pyinstaller~=5.0.0
+selenium~=4.19.0
