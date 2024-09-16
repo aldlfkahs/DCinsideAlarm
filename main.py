@@ -161,6 +161,7 @@ def get_html(url, session, bot_account: dict = None):
         if resp.status_code == 200:
             return resp.text
         else:
+            print(resp.text)
             return requests.exceptions.HTTPError(f'Status Code: {resp.status_code}')
 
 def resource_path(relative_path):
