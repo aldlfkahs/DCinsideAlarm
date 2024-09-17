@@ -66,7 +66,7 @@ jobs:
       id: extract_tag
       run: |
         $buildInfo = Get-Content -Path "buildinfo.txt"
-        tagName=${GITHUB_REF#refs/tags/}
+        $tagName = $env:GITHUB_REF -replace 'refs/tags/', ''
 
         if ($buildInfo -like "*dc*") {
           echo "RELEASE_NAME=디씨 새글알리미 $tagName" >> $GITHUB_ENV
