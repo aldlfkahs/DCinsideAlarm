@@ -76,6 +76,7 @@ jobs:
         else {
           Write-Error "buildinfo.txt does not contain a valid identifier."
         }
+      shell: pwsh
 
     - name: Create GitHub Release
       uses: ncipollo/release-action@v1
