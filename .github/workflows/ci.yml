@@ -2,13 +2,8 @@ name: Build and Release DCinsideAlarm
 
 on:
   push:
-    branches:
-      - master
-      - arcalive
-  pull_request:
-    branches:
-      - master
-      - arcalive
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -36,12 +31,18 @@ jobs:
     - name: Build executable
       run: |
         conda activate ./py38
-        if ("${{ github.ref }}" -eq "refs/heads/arcalive") {
-          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="아카라이브새글알리미-${{ github.ref_name }}.exe" main.py
+        $buildInfo = Get-Content -Path "buildinfo.txt"
+        
+        if ($buildInfo -like "*dc*") {
+          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="DC새글알리미-$buildInfo.exe" main.py
+        }
+        elseif ($buildInfo -like "*arcalive*") {
+          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="아카라이브새글알리미-$buildInfo.exe" main.py
         }
         else {
-          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="DC새글알리미-${{ github.ref_name }}.exe" main.py
+          Write-Error "buildinfo.txt does not contain a valid identifier."
         }
+      shell: pwsh
 
     - name: Upload artifact
       uses: actions/upload-artifact@v3
@@ -67,8 +68,8 @@ jobs:
           *.exe
           README.md
         token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ github.ref }}
-        name: Release ${{ github.ref }}
+        tag: ${{ github.ref_name }}
+        name: Release ${{ github.ref_name }}
         body: "Auto-generated release"
         draft: false
         prerelease: false
