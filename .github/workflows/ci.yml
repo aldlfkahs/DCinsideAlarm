@@ -1,0 +1,93 @@
+name: Build and Release DCinsideAlarm
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Miniconda
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        auto-update-conda: true
+        activate-environment: py38
+        python-version: 3.8.8
+
+    - name: Install dependencies
+      run: |
+        conda config --env --set subdir win-32
+        conda create -p ./py38 python=3.8.8 pip=21.0.1 -y
+        conda activate ./py38
+        set CONDA_SUBDIR=win-32
+        pip install -r requirements.txt
+
+    - name: Build executable
+      run: |
+        conda activate ./py38
+        $buildInfo = Get-Content -Path "buildinfo.txt"
+        
+        if ($buildInfo -like "*dc*") {
+          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="DC새글알리미-$buildInfo.exe" main.py
+        }
+        elseif ($buildInfo -like "*arcalive*") {
+          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="아카라이브새글알리미-$buildInfo.exe" main.py
+        }
+        else {
+          Write-Error "buildinfo.txt does not contain a valid identifier."
+        }
+      shell: pwsh
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: 알리미
+        path: |
+          dist/*.exe
+          README.md
+          buildinfo.txt
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download built artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: 알리미
+
+    - name: Extract tag name and determine release title
+      id: extract_tag
+      run: |
+        $buildInfo = Get-Content -Path "buildinfo.txt"
+        $tagName = $env:GITHUB_REF -replace 'refs/tags/', ''
+
+        if ($buildInfo -like "*dc*") {
+          echo "RELEASE_NAME=디씨 새글알리미 $tagName" >> $GITHUB_ENV
+        }
+        elseif ($buildInfo -like "*arcalive*") {
+          echo "RELEASE_NAME=아카라이브 새글알리미 $tagName" >> $GITHUB_ENV
+        }
+        else {
+          Write-Error "buildinfo.txt does not contain a valid identifier."
+        }
+      shell: pwsh
+
+    - name: Create GitHub Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: |
+          dist/*.exe
+          README.md
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref_name }}
+        name: ${{ env.RELEASE_NAME }}
+        body: ${{ env.RELEASE_NAME }}
+        draft: false
+        prerelease: false
