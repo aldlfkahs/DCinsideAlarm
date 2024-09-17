@@ -23,7 +23,6 @@ jobs:
       with:
         auto-update-conda: true
         activate-environment: py38
-        environment-file: environment.yml
         python-version: 3.8.8
 
     - name: Install dependencies
