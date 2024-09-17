@@ -34,10 +34,10 @@ jobs:
         $buildInfo = Get-Content -Path "buildinfo.txt"
         
         if ($buildInfo -like "*dc*") {
-          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="DC새글알리미-$buildInfo.exe" main.py
+          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="DCinsideAlaram-$buildInfo.exe" main.py
         }
         elseif ($buildInfo -like "*arcalive*") {
-          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="아카라이브새글알리미-$buildInfo.exe" main.py
+          pyinstaller --windowed --onefile --clean --icon="icon.ico" --add-data="icon.png;." --add-data="image.ico;." --name="ArcaliveAlarm-$buildInfo.exe" main.py
         }
         else {
           Write-Error "buildinfo.txt does not contain a valid identifier."
@@ -69,10 +69,10 @@ jobs:
         $tagName = $env:GITHUB_REF -replace 'refs/tags/', ''
 
         if ($buildInfo -like "*dc*") {
-          echo "RELEASE_NAME=디씨 새글알리미 $tagName" >> $GITHUB_ENV
+          echo "RELEASE_NAME=DCinsideAlaram $tagName" >> $GITHUB_ENV
         }
         elseif ($buildInfo -like "*arcalive*") {
-          echo "RELEASE_NAME=아카라이브 새글알리미 $tagName" >> $GITHUB_ENV
+          echo "RELEASE_NAME=ArcaliveAlarm $tagName" >> $GITHUB_ENV
         }
         else {
           Write-Error "buildinfo.txt does not contain a valid identifier."
