@@ -61,15 +61,31 @@ jobs:
       with:
         name: 알리미
 
+    - name: Extract tag name and determine release title
+      id: extract_tag
+      run: |
+        $buildInfo = Get-Content -Path "buildinfo.txt"
+        tagName=${GITHUB_REF#refs/tags/}
+
+        if ($buildInfo -like "*dc*") {
+          echo "RELEASE_NAME=디씨 새글알리미 $tagName" >> $GITHUB_ENV
+        }
+        elseif ($buildInfo -like "*arcalive*") {
+          echo "RELEASE_NAME=아카라이브 새글알리미 $tagName" >> $GITHUB_ENV
+        }
+        else {
+          Write-Error "buildinfo.txt does not contain a valid identifier."
+        }
+
     - name: Create GitHub Release
       uses: ncipollo/release-action@v1
       with:
         artifacts: |
-          *.exe
+          dist/*.exe
           README.md
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.ref_name }}
-        name: Release ${{ github.ref_name }}
-        body: "Auto-generated release"
+        name: ${{ env.RELEASE_NAME }}
+        body: ${{ env.RELEASE_NAME }}
         draft: false
         prerelease: false
