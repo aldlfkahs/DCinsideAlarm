@@ -51,6 +51,7 @@ jobs:
         path: |
           dist/*.exe
           README.md
+          buildinfo.txt
 
   release:
     needs: build
