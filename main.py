@@ -51,7 +51,7 @@ import smtplib
 import cerberus
 from email.message import EmailMessage
 
-version = '1.8.0'
+version = '1.8.1'
 
 class get_default_logger(object):
     def __new__(cls):

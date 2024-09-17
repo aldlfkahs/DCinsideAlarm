@@ -122,6 +122,10 @@ __알림 소리를 끄고 싶다면?__
 1.8.0버전  
 -작성자 기준 키워드 알림 기능을 추가하였습니다.  
 
+1.8.1버전  
+-github workflow를 구축하였습니다.(기능과 무관)  
+
+
 ### 도움을 주신 분
 RTFM  
 
@@ -130,4 +134,4 @@ RTFM
 이메일 : aldlfkahs95@naver.com  
 블로그 : https://togomi.tistory.com/12  
 
-버그 문의 시, Notification.log 파일을 같이 첨부하여 보내주세요!
+__버그 문의 시, Notification.log 파일을 같이 첨부__하여 보내주세요!
